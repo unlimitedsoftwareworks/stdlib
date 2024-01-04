@@ -1,0 +1,118 @@
+/**
+ * @file array.ts
+ * @description Default array interface
+ * Implemented within the VM level.
+ */
+
+from std.io import io
+
+type AbstractArray<T> = interface {
+    /** x[i] */
+    fn __index__(i: u64) -> T
+    /** x[i] = v */
+    fn __index_set__(i: u64, v: T) -> T
+
+    /**
+     * @description Returns the length of the array
+     */
+    fn length() -> u64
+
+    /**
+     * @description Returns the element at the given index
+     */
+    fn push(v: T) -> void
+
+    /**
+     * @description Returns the element at the given index
+     */
+    fn pop() -> T
+
+    /**
+     * @description Returns a new array with the result of the given function
+     */
+    fn map(f: fn (x: T) -> T) -> AbstractArray<T>
+
+    /** 
+     * @description Returns a new array with the result of the given filter function
+     */
+    fn filter(f: fn (x: T) -> bool) -> AbstractArray<T>
+    fn reduce(f: fn (x: T, y: T) -> T) -> T
+    fn forEach(f: fn (x: T) -> void) -> void
+}
+
+type Array<T> = class AbstractArray<T> {
+    let data: T[]
+    let len: u64
+    let capacity: u64
+
+    fn init(data: T[]) {
+        this.data = data
+        this.len = data.length
+        this.capacity = this.len
+    }
+
+    fn length() -> u64 {
+        return this.len
+    }
+
+    fn push(v: T) -> void {
+        if this.len == this.capacity {
+            this.capacity = this.capacity * 2 + 1
+            this.data.extend(this.capacity)
+        }
+        this.data[this.len] = v
+        this.len = this.len + 1
+    }
+ 
+    fn pop() -> T {
+        if this.len == 0 {
+            
+        }
+        this.len = this.len - 1
+        return this.data[this.len]
+    }
+
+    fn __index__(i: u64) -> T {
+        return this.data[i]
+    }
+
+    fn __index_set__(i: u64, v: T) -> T {
+        this.data[i] = v
+        return v
+    }
+
+    fn map(f: fn (x: T) -> T) -> AbstractArray<T> {
+        let z1: i32 = 1
+        let result1 = new Array<T>([])
+        for let i: u64 = 0; i < this.len; i = i + 1 {
+            result1.push(f(this.data[i]))
+        }
+        let z2: i32 = 2
+        return result1
+    }
+
+    fn filter(f: fn (x: T) -> bool) -> AbstractArray<T> {
+        let result2 = new Array<T>([])
+        
+        for let i: u64 = 0; i < this.len; i = i + 1 {
+            if f(this.data[i]) {
+                result2.push(this.data[i])
+            }
+        }
+        return result2
+    }
+
+    fn reduce(f: fn (x: T, y: T) -> T) -> T {
+        let result3 = this.data[0]
+        for let i: u64 = 1; i < this.len; i = i + 1 {
+            result3 = f(result3, this.data[i])
+        }
+        return result3
+    }
+
+    fn forEach(f: fn (x: T) -> void) -> void {
+        for  let i: u64 = 0; i < this.len; i = i + 1 {
+            f(this.data[i])
+        }
+    }
+}

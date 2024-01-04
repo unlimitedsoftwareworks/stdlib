@@ -1,0 +1,322 @@
+from std.io import io
+from std.stdcore import CastAPI
+
+type IndexResult = variant {
+    Ok(pos: u32),
+    NotFound()
+}
+
+type Serilizable<T> = interface {
+    fn serialize() -> u8[]
+    static fn deserialize(data: u8[])
+}
+
+/**
+ * UTF8-Character
+ */
+type Char = class {
+    let data: u8[]
+
+    fn init(charData: u8[]) {
+        this.data = charData
+    }
+
+    fn bytes() -> u8[] {
+        return this.data
+    }
+}
+
+/**
+ * Abstract String interface
+ */
+type String = interface {
+    fn length() -> u64
+    fn rawLength() -> u64
+    /*
+    fn replace(pattern: String, replacement: String) -> String
+    fn split(pattern: String) -> String[]
+    fn trim() -> String
+    fn trimLeft() -> String
+    fn trimRight() -> String
+    fn toLower() -> String
+    fn toUpper() -> String
+    fn startsWith(pattern: String) -> bool
+    fn endsWith(pattern: String) -> bool
+    fn contains(pattern: String) -> bool
+    fn indexOf(pattern: String) -> u64
+    fn lastIndexOf(pattern: String) -> u64
+    fn subString(start: u32, end: u32) -> String
+    */
+
+    fn clone() -> String
+    
+    /** x[i] */
+    fn __index__(idx: u64) -> Char
+    /** x + y */
+   // fn __add__(other: String) -> String
+
+   fn bytes() -> u8[]
+
+   //fn cat<T: u64|i64|f64|string>(other: T) -> String
+}
+
+/**
+ * UTF8-String
+ * TODO:
+ * - add allocated length and actual length
+ * - call new stringAppend ... for adding numbers
+ */
+type UTF8String = class String {
+    /**
+     * UTF-8 encoded data
+     * Raw array buffer
+     */
+    let data: u8[]
+
+    /**
+     * The raw Length of the string in terms of bytes
+     * not to be confused with the array buffer length.
+     */
+    let rawLen: u64
+
+    /**
+     * Length of the string in terms of UTF-8 Characters
+     */
+    let utf8Length: u64
+
+    /**
+     * Capacity of the array buffer, should be equal to data.length
+     */
+    let rawCapacity: u64
+
+
+    let charIndicies: u64[]
+    let charLen: u64
+
+    /**
+     * Creates a UTF-8 String from an array buffer.
+     * It is a good practice to not store references of arrays but rather
+     * Make copy of them
+     */
+    fn init(data: u8[]) {
+        this.data = []
+        this.data.extend(data.length)
+        
+        this.charIndicies = []
+        this.charIndicies.extend(data.length)
+        
+        let i: u64 = 0
+        let charCounter: u64 = 0
+
+        while i < data.length {
+            let byte = data[i]
+
+            this.charIndicies[charCounter] = i
+            charCounter += 1
+
+            // Determine the number of bytes in this UTF-8 character
+            let numBytes: u8 = 0
+
+            if (byte & 0x80) == 0 {        // 1-byte character
+                numBytes = 1
+                this.data[i] = data[i]
+            } else if (byte & 0xE0) == 0xC0 { // 2-byte character
+                numBytes = 2
+                this.data[i] = data[i]
+                this.data[i+1] = data[i+1]
+            } else if (byte & 0xF0) == 0xE0 { // 3-byte character
+                numBytes = 3
+                this.data[i] = data[i]
+                this.data[i+1] = data[i+1]
+                this.data[i+2] = data[i+2]
+            } else if (byte & 0xF8) == 0xF0 { // 4-byte character
+                numBytes = 4
+                this.data[i] = data[i]
+                this.data[i+1] = data[i+1]
+                this.data[i+2] = data[i+2]
+                this.data[i+3] = data[i+3]
+            } else {
+                numBytes = 1
+                this.data[i] = data[i]
+            }
+
+            i += numBytes
+        }
+
+        this.utf8Length = charCounter
+        this.charLen = charCounter
+        this.rawCapacity = data.length
+        this.rawLen = data.length
+    }
+
+    /**
+     * Returns the length of the string
+     */
+    fn length() -> u64 {
+        return this.utf8Length
+    }
+
+    /**
+     * Returns the raw length of the string
+     */
+    fn rawLength() -> u64 {
+        return this.rawLen
+    }
+
+    fn clone() -> String {
+        let str = new UTF8String(this.data)
+        return str
+    }
+
+    /**
+     * Returns the byte array representation of the string
+     */
+    fn bytes() -> u8[] {
+        return this.data
+    }
+
+    /**
+     * Returns the UTF-8 character at the given index
+     */
+    fn __index__(idx: u64) -> Char {
+        return new Char([this.data[idx]])
+    }
+
+    /**
+     * Concatenates this string with the given string, overriding this' strings data.
+     * returns the same reference
+     */
+    fn __add__(other: UTF8String) -> UTF8String {
+        return this.cat_arr(other.bytes())
+    }
+
+    fn cat_arr(data: u8[]) -> UTF8String {
+        this.data.extend(this.data.length + data.length)
+        this.charIndicies.extend(this.charIndicies.length + data.length)
+
+        let i: u64 = 0
+        let charCounter: u64 = this.charLen
+        let offset = this.rawLen
+
+        while i < data.length {
+            let byte = data[i]
+
+            this.charIndicies[charCounter] = i
+            charCounter += 1
+
+            // Determine the number of bytes in this UTF-8 character
+            let numBytes: u8 = 0
+            if (byte & 0x80) == 0 {        // 1-byte character
+                numBytes = 1
+                this.data[offset+i] = data[i]
+            } else if (byte & 0xE0) == 0xC0 { // 2-byte character
+                numBytes = 2
+                this.data[offset+i] = data[i]
+                this.data[offset+i+1] = data[i+1]
+            } else if (byte & 0xF0) == 0xE0 { // 3-byte character
+                numBytes = 3
+                this.data[offset+i] = data[i]
+                this.data[offset+i+1] = data[i+1]
+                this.data[offset+i+2] = data[i+2]
+            } else if (byte & 0xF8) == 0xF0 { // 4-byte character
+                numBytes = 4
+                this.data[offset+i] = data[i]
+                this.data[offset+i+1] = data[i+1]
+                this.data[offset+i+2] = data[i+2]
+                this.data[offset+i+3] = data[i+3]
+            } else {
+                numBytes = 1
+                this.data[offset+i] = data[i]
+            }
+
+            i += numBytes
+        }
+
+        this.utf8Length = charCounter
+        this.charLen = charCounter
+        this.rawCapacity += data.length
+        this.rawLen += data.length
+
+        return this
+    }
+
+    fn cat(other: UTF8String) -> UTF8String {
+        return this.cat_arr(other.bytes())
+    }
+
+    fn cat_u8(number: u8) -> UTF8String{
+        let c = CastAPI.stringAppend_u8(this.data, number, this.rawLen as u32)
+        this.rawLen += c
+
+        return this
+    }
+
+    fn cat_u16(number: u16) -> UTF8String{
+        let c = CastAPI.stringAppend_u16(this.data, number, this.rawLen as u32)
+        this.rawLen += c
+
+        return this
+    }
+
+    fn cat_u32(number: u32) -> UTF8String{
+        let c = CastAPI.stringAppend_u32(this.data, number, this.rawLen as u32)
+        this.rawLen += c
+
+        return this
+    }
+
+    fn cat_u64(number: u64) -> UTF8String{
+        let c = CastAPI.stringAppend_u64(this.data, number, this.rawLen as u32)
+        this.rawLen += c
+
+        return this
+    }
+
+    fn cat_i8(number: i8) -> UTF8String{
+        let c = CastAPI.stringAppend_i8(this.data, number, this.rawLen as u32)
+        this.rawLen += c
+
+        return this
+    }
+
+    fn cat_i16(number: i16) -> UTF8String{
+        let c = CastAPI.stringAppend_i16(this.data, number, this.rawLen as u32)
+        this.rawLen += c
+
+        return this
+    }
+
+    fn cat_i32(number: i32) -> UTF8String{
+        let c = CastAPI.stringAppend_i32(this.data, number, this.rawLen as u32)
+        this.rawLen += c
+
+        return this
+    }
+
+    fn cat_i64(number: i64) -> UTF8String{
+        let c = CastAPI.stringAppend_i64(this.data, number, this.rawLen as u32)
+        this.rawLen += c
+        return this
+    }
+
+    fn cat_f32(number: f32) -> UTF8String{
+        let c = CastAPI.stringAppend_f32(this.data, number, this.rawLen as u32)
+        this.rawLen += c
+
+        return this
+    }
+
+    fn cat_f64(number: f64) -> UTF8String{
+        let c = CastAPI.stringAppend_f64(this.data, number, this.rawLen as u32)
+        this.rawLen += c
+
+        return this
+    }
+
+    fn cat_bool(number: bool) -> UTF8String{
+        let c = CastAPI.stringAppend_bool(this.data, number, this.rawLen as u32)
+        this.rawLen += c
+
+        return this
+    }    
+}

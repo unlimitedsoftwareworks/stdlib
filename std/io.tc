@@ -1,0 +1,12 @@
+from std.String import String
+
+extern io from "stdio" = { 
+    fn print(s: u8[]) -> void
+    fn println(s: u8[]) -> void
+    fn print_u64(n: u64) -> void
+    fn print_string(s: u8[], length: u64) -> void
+}
+
+fn println(s: String) -> void {
+    io.print_string(s.bytes(), s.rawLength())
+}
