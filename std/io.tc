@@ -1,5 +1,5 @@
 
-from std.String import String
+from std.strings import String
 from std.vm_api.io import io
 
 fn print(s: String) -> void {

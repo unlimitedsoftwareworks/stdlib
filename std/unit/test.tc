@@ -1,4 +1,4 @@
-from std.String import String, UTF8String
+from std.strings import String
 from std.io import println
 
 type AssertionResult = variant {

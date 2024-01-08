@@ -26,81 +26,12 @@ type Char = class {
 }
 
 /**
- * Abstract String interface
- */
-type String = interface {
-    fn cat(x: u8[]) -> String
-    fn cat(x: u32) -> String
-    fn cat(x: i8) -> String
-    fn cat(x: f32) -> String
-    fn cat(x: f64) -> String
-    fn cat(x: bool) -> String
-    fn cat(x: u8) -> String
-    fn cat(x: u16) -> String
-    fn cat(x: u64) -> String
-    fn cat(x: i16) -> String
-    fn cat(x: i32) -> String
-    fn cat(x: i64) -> String
-    fn cat(x: String) -> String
-    fn length() -> u64
-    fn rawLength() -> u64
-    /*
-    fn replace(pattern: String, replacement: String) -> String
-    fn split(pattern: String) -> String[]
-    fn trim() -> String
-    fn trimLeft() -> String
-    fn trimRight() -> String
-    fn toLower() -> String
-    fn toUpper() -> String
-    fn startsWith(pattern: String) -> bool
-    fn endsWith(pattern: String) -> bool
-    fn contains(pattern: String) -> bool
-    fn indexOf(pattern: String) -> u64
-    fn lastIndexOf(pattern: String) -> u64
-    fn subString(start: u32, end: u32) -> String
-    */
-
-    fn clone() -> String
-    
-    /** x[i] */
-    fn __index__(idx: u64) -> Char
-    /** x + y */
-   // fn __add__(other: String) -> String
-
-    fn eq(other: String) -> bool
-
-    fn bytes() -> u8[]
-    
-    fn __add__(other: UTF8String) -> String
-    fn __add__(other: String) -> String
-    fn __add__(other: u8[]) -> String
-    fn __add__(other: u32) -> String
-    fn __add__(other: i8) -> String
-    fn __add__(other: f32) -> String
-    fn __add__(other: f64) -> String
-    fn __add__(other: bool) -> String
-    fn __add__(other: u8) -> String
-    fn __add__(other: u16) -> String
-    fn __add__(other: u64) -> String
-    fn __add__(other: i16) -> String
-    fn __add__(other: i32) -> String
-    fn __add__(other: i64) -> String
-
-    fn toString() -> String
-
-
-    
-
-   //fn cat<T: u64|i64|f64|string>(other: T) -> String
-}
-
-/**
  * UTF8-String
  * TODO:
  * - add allocated length and actual length
  * - call new stringAppend ... for adding numbers
  */
-type UTF8String = class String {
+type String = class {
     /**
      * UTF-8 encoded buffer
      * Raw array buffer
@@ -141,17 +72,13 @@ type UTF8String = class String {
         this.charLen = 0
     }
     
-    fn init(copy: UTF8String) {
+    fn init(copy: String) {
         this.buffer = copy.buffer
         this.charIndicies = copy.charIndicies
         this.rawLen = copy.rawLen
         this.utf8Length = copy.utf8Length
         this.rawCapacity = copy.rawCapacity
         this.charLen = copy.charLen
-    }
-
-    fn init(copy: String) {
-        this.init(copy.bytes())
     }
 
     fn init(buffer: u8[]) {
@@ -210,7 +137,7 @@ type UTF8String = class String {
     }
 
     static fn fromBytes(buffer: u8[]) -> String {
-        let str = new UTF8String(buffer)
+        let str = new String(buffer)
         return str
     }
 
@@ -229,7 +156,7 @@ type UTF8String = class String {
     }
 
     fn clone() -> String {
-        let str = new UTF8String(this.buffer)
+        let str = new String(this.buffer)
         return str
     }
 
@@ -267,9 +194,6 @@ type UTF8String = class String {
      * Concatenates this string with the given string, overriding this' strings buffer.
      * returns the same reference
      */
-    fn __add__(other: UTF8String) -> String {
-        return this.cat(other.bytes(), other.rawLength())
-    }
 
     fn __add__(other: u8[]) -> String {
         return this.cat(other)
@@ -380,11 +304,7 @@ type UTF8String = class String {
 
         return this
     }
-
-    fn cat(other: UTF8String) -> String {
-        return this.cat(other.bytes())
-    }
-
+    
     fn cat(number: u8) -> String{
         let c = CastAPI.stringAppend_u8(this.buffer, number, this.rawLen as u32)
         this.rawLen += c
