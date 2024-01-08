@@ -4,13 +4,11 @@
  * Implemented within the VM level.
  */
 
-from std.io import io
-
 type AbstractArray<T> = interface {
     /** x[i] */
     fn __index__(i: u64) -> T
     /** x[i] = v */
-    fn __index_set__(i: u64, v: T) -> T
+    fn __index_set__(v: T,i: u64) -> T
 
     /**
      * @description Returns the length of the array
@@ -26,18 +24,6 @@ type AbstractArray<T> = interface {
      * @description Returns the element at the given index
      */
     fn pop() -> T
-
-    /**
-     * @description Returns a new array with the result of the given function
-     */
-    fn map(f: fn (x: T) -> T) -> AbstractArray<T>
-
-    /** 
-     * @description Returns a new array with the result of the given filter function
-     */
-    fn filter(f: fn (x: T) -> bool) -> AbstractArray<T>
-    fn reduce(f: fn (x: T, y: T) -> T) -> T
-    fn forEach(f: fn (x: T) -> void) -> void
 }
 
 type Array<T> = class AbstractArray<T> {
@@ -76,11 +62,12 @@ type Array<T> = class AbstractArray<T> {
         return this.data[i]
     }
 
-    fn __index_set__(i: u64, v: T) -> T {
+    fn __index_set__(v: T, i: u64) -> T {
         this.data[i] = v
         return v
     }
 
+    /*
     fn map(f: fn (x: T) -> T) -> AbstractArray<T> {
         let z1: i32 = 1
         let result1 = new Array<T>([])
@@ -90,8 +77,19 @@ type Array<T> = class AbstractArray<T> {
         let z2: i32 = 2
         return result1
     }
+    */
 
-    fn filter(f: fn (x: T) -> bool) -> AbstractArray<T> {
+
+    fn map<Z>(f: fn (x: T) -> Z) -> Array<Z> {
+        let result1 = new Array<Z>([])
+        for let i: u64 = 0; i < this.len; i = i + 1 {
+            result1.push(f(this.data[i]))
+        }
+
+        return result1
+    }
+
+    fn filter(f: fn (x: T) -> bool) -> Array<T> {
         let result2 = new Array<T>([])
         
         for let i: u64 = 0; i < this.len; i = i + 1 {

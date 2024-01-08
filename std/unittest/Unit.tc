@@ -1,0 +1,301 @@
+from std.String import String, UTF8String
+from std.io import println
+
+type AssertionResult = variant {
+    Ok(),
+    Failed(message: String)
+}
+
+type UnitState = enum {
+    Passed,
+    Failed,
+    NotProcessed
+}
+
+type T = interface {
+    fn toString() -> String
+    fn eq(other: T) -> bool
+}
+
+type TestUnit = class {
+    let name: string
+    let description: string
+    let runner: fn (unit: TestUnit) -> void
+    let results: AssertionResult[]
+    let state: UnitState
+
+    fn init(name: string, description: string, runner: fn (unit: TestUnit) -> void) {
+        this.name = name
+        this.description = description
+        this.runner = runner
+        this.results = []
+        //this.state = UnitState.NotProcessed
+    }
+
+    fn run() -> void {
+        this.runner(this)
+    }
+
+    fn check() -> bool {
+        let failed = false
+
+        for let i: u64 = 0; i < this.results.length; i += 1 {
+            if this.results[i] is AssertionResult.Failed {
+                failed = true
+            }
+        }
+
+        if failed {
+            this.state = UnitState.Failed
+        } else {
+            this.state = UnitState.Passed
+        }
+
+        return failed
+    }
+
+    fn report() {
+        let failed = false
+        let failedCount: u64 = 0
+
+        for let i: u64 = 0; i < this.results.length; i += 1 {
+            if this.results[i] is AssertionResult.Failed {
+                let failedResult = this.results[i] as! AssertionResult.Failed
+                println("❗ Test "+this.name+", Assertion "+i+": "+" failed: "+failedResult.message)
+            }
+        }
+        
+        let successCount: u64 = this.results.length - failedCount
+
+        println("Results: "+successCount+"/"+this.results.length)
+
+    }
+
+    fn getState() -> UnitState {
+        return this.state
+    }
+
+    fn pushResult(result: AssertionResult) {
+        this.results.extend(this.results.length+1)
+        this.results[this.results.length-1] = result
+    }
+
+    fn assert_u8_eq(actual: u8, expected: u8) {
+        if actual == expected {
+            this.pushResult(AssertionResult.Ok())
+        } else {
+            this.pushResult(AssertionResult.Failed("Expected " + expected + " but got " + actual))
+        }
+    }
+
+    fn assert_u8_neq(actual: u8, expected: u8) {
+        if actual != expected {
+            this.pushResult(AssertionResult.Ok())
+        } else {
+            this.pushResult(AssertionResult.Failed("Expected " + expected + " but got " + actual))
+        }
+    }
+
+    fn assert_u16_eq(actual: u16, expected: u16) {
+        if actual == expected {
+            this.pushResult(AssertionResult.Ok())
+        } else {
+            this.pushResult(AssertionResult.Failed("Expected " + expected + " but got " + actual))
+        }
+    }
+
+    fn assert_u16_neq(actual: u16, expected: u16) {
+        if actual != expected {
+            this.pushResult(AssertionResult.Ok())
+        } else {
+            this.pushResult(AssertionResult.Failed("Expected " + expected + " but got " + actual))
+        }
+    }
+
+    fn assert_u32_eq(actual: u32, expected: u32) {
+        if actual == expected {
+            this.pushResult(AssertionResult.Ok())
+        } else {
+            this.pushResult(AssertionResult.Failed("Expected " + expected + " but got " + actual))
+        }
+    }
+
+    fn assert_u32_neq(actual: u32, expected: u32) {
+        if actual != expected {
+            this.pushResult(AssertionResult.Ok())
+        } else {
+            this.pushResult(AssertionResult.Failed("Expected " + expected + " but got " + actual))
+        }
+    }
+
+    fn assert_u64_eq(actual: u64, expected: u64) {
+        if actual == expected {
+            this.pushResult(AssertionResult.Ok())
+        } else {
+            this.pushResult(AssertionResult.Failed("Expected " + expected + " but got " + actual))
+        }
+    }
+
+    fn assert_u64_neq(actual: u64, expected: u64) {
+        if actual != expected {
+            this.pushResult(AssertionResult.Ok())
+        } else {
+            this.pushResult(AssertionResult.Failed("Expected " + expected + " but got " + actual))
+        }
+    }
+
+    fn assert_f32_eq(actual: f32, expected: f32) {
+        if actual == expected {
+            this.pushResult(AssertionResult.Ok())
+        } else {
+            this.pushResult(AssertionResult.Failed("Expected "+expected+" but got "+actual))
+        }
+    }
+
+    fn assert_f32_eq_pre(actual: f32, expected: f32, precision: f32) {
+        if actual - expected < precision {
+            this.pushResult(AssertionResult.Ok())
+        } else {
+            this.pushResult(AssertionResult.Failed("Expected "+expected+" but got "+actual))
+        }
+    }
+
+
+    fn assert_f32_neq(actual: f32, expected: f32) {
+        if actual != expected {
+            this.pushResult(AssertionResult.Ok())
+        } else {
+            this.pushResult(AssertionResult.Failed("Expected "+expected+" but got "+actual))
+        }   
+    }
+
+    fn assert_f32_neq_pre(actual: f32, expected: f32, precision: f32) {
+        if actual - expected > precision {
+            this.pushResult(AssertionResult.Ok())
+        } else {
+            this.pushResult(AssertionResult.Failed("Expected "+expected+" but got "+actual))
+        }
+    }
+
+
+    fn assert_f64_eq(actual: f64, expected: f64) {
+        if actual == expected {
+            this.pushResult(AssertionResult.Ok())
+        } else {
+            this.pushResult(AssertionResult.Failed("Expected "+expected+" but got "+actual))
+        }
+    }
+
+    fn assert_f64_eq_pre(actual: f64, expected: f64, precision: f64) {
+        if actual - expected < precision {
+            this.pushResult(AssertionResult.Ok())
+        } else {
+            this.pushResult(AssertionResult.Failed("Expected "+expected+" but got "+actual))
+        }
+    }
+
+
+    fn assert_f64_neq(actual: f64, expected: f64) {
+        if actual != expected {
+            this.pushResult(AssertionResult.Ok())
+        } else {
+            this.pushResult(AssertionResult.Failed("Expected "+expected+" but got "+actual))
+        }   
+    }
+
+    fn assert_f64_neq_pre(actual: f64, expected: f64, precision: f64) {
+        if actual - expected > precision {
+            this.pushResult(AssertionResult.Ok())
+        } else {
+            this.pushResult(AssertionResult.Failed("Expected "+expected+" but got "+actual))
+        }
+    }
+
+    fn assert_obj_eq<T>(actual: T, expected: T) {
+        if actual.eq(expected) {
+            this.pushResult(AssertionResult.Ok())
+        } else {
+            this.pushResult(AssertionResult.Failed("Expected " + expected.toString() + " but got " + actual.toString()))
+        }
+    }
+
+    fn assert_obj_neq<T>(actual: T, expected: T) {
+        if actual.eq(expected) == false {
+            this.pushResult(AssertionResult.Ok())
+        } else {
+            this.pushResult(AssertionResult.Failed("Expected " + expected.toString() + " but got " + actual.toString()))
+        }
+    }
+
+    fn assert_obj_null<T>(actual: T?) {
+        if actual == null {
+            this.pushResult(AssertionResult.Ok())
+        } else {
+            this.pushResult(AssertionResult.Failed("Expected null but got " + actual!.toString()))
+        }
+    }
+
+    fn assert_obj_not_null<T>(actual: T?) {
+        if actual != null {
+            this.pushResult(AssertionResult.Ok())
+        } else {
+            this.pushResult(AssertionResult.Failed("Expected not null but got null"))
+        }
+    }
+}
+
+
+type UnitSet = class {
+    let units: TestUnit[]
+    let name: string
+    let description: string
+
+    fn init(name: string, description: string, units: TestUnit[]) {
+        this.name = name
+        this.description = description
+        this.units = units
+    }
+
+    fn addUnit(unit: TestUnit) {
+        this.units.extend(this.units.length+1)
+        this.units[this.units.length-1] = unit
+    }
+
+    fn report() {
+        let failed = false
+        let failedCount: u64 = 0
+        println("Summary for "+this.name+":")
+        for let i: u64 = 0; i < this.units.length; i += 1 {
+            if this.units[i].getState() == UnitState.Failed {
+                println("Unit "+this.units[i].name+" 🚨")
+            }
+            else {
+                println("Unit "+this.units[i].name+" ✅")
+            }
+            println("-----------------------------------------------")
+        }
+    }
+
+    fn run() -> void {
+        let failed = false
+        println("Running "+this.name+"...")
+        for let i: u64 = 0; i < this.units.length; i += 1 {
+            this.units[i].run()
+            failed = failed || this.units[i].check()
+        }
+
+        this.report()
+
+        println("Details:")
+        for let i: u64 = 0; i < this.units.length; i += 1 {
+            this.units[i].report()
+        }
+    
+
+        if failed {
+            println("😭 "+this.name+" has failed..")
+        } else {
+            println("🙌 "+this.name+" has passed")
+        }
+    }
+}

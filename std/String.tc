@@ -1,5 +1,5 @@
-from std.io import io
-from std.stdcore import CastAPI
+from std.vm_api.io import io
+from std.vm_api.stdcore import CastAPI
 
 type IndexResult = variant {
     Ok(pos: u32),
@@ -8,21 +8,20 @@ type IndexResult = variant {
 
 type Serilizable<T> = interface {
     fn serialize() -> u8[]
-    static fn deserialize(data: u8[])
 }
 
 /**
  * UTF8-Character
  */
 type Char = class {
-    let data: u8[]
+    let buffer: u8[]
 
     fn init(charData: u8[]) {
-        this.data = charData
+        this.buffer = charData
     }
 
     fn bytes() -> u8[] {
-        return this.data
+        return this.buffer
     }
 }
 
@@ -30,6 +29,19 @@ type Char = class {
  * Abstract String interface
  */
 type String = interface {
+    fn cat(x: u8[]) -> String
+    fn cat(x: u32) -> String
+    fn cat(x: i8) -> String
+    fn cat(x: f32) -> String
+    fn cat(x: f64) -> String
+    fn cat(x: bool) -> String
+    fn cat(x: u8) -> String
+    fn cat(x: u16) -> String
+    fn cat(x: u64) -> String
+    fn cat(x: i16) -> String
+    fn cat(x: i32) -> String
+    fn cat(x: i64) -> String
+    fn cat(x: String) -> String
     fn length() -> u64
     fn rawLength() -> u64
     /*
@@ -55,7 +67,29 @@ type String = interface {
     /** x + y */
    // fn __add__(other: String) -> String
 
-   fn bytes() -> u8[]
+    fn eq(other: String) -> bool
+
+    fn bytes() -> u8[]
+    
+    fn __add__(other: UTF8String) -> String
+    fn __add__(other: String) -> String
+    fn __add__(other: u8[]) -> String
+    fn __add__(other: u32) -> String
+    fn __add__(other: i8) -> String
+    fn __add__(other: f32) -> String
+    fn __add__(other: f64) -> String
+    fn __add__(other: bool) -> String
+    fn __add__(other: u8) -> String
+    fn __add__(other: u16) -> String
+    fn __add__(other: u64) -> String
+    fn __add__(other: i16) -> String
+    fn __add__(other: i32) -> String
+    fn __add__(other: i64) -> String
+
+    fn toString() -> String
+
+
+    
 
    //fn cat<T: u64|i64|f64|string>(other: T) -> String
 }
@@ -68,10 +102,10 @@ type String = interface {
  */
 type UTF8String = class String {
     /**
-     * UTF-8 encoded data
+     * UTF-8 encoded buffer
      * Raw array buffer
      */
-    let data: u8[]
+    let buffer: u8[]
 
     /**
      * The raw Length of the string in terms of bytes
@@ -85,7 +119,7 @@ type UTF8String = class String {
     let utf8Length: u64
 
     /**
-     * Capacity of the array buffer, should be equal to data.length
+     * Capacity of the array buffer, should be equal to buffer.length
      */
     let rawCapacity: u64
 
@@ -98,18 +132,40 @@ type UTF8String = class String {
      * It is a good practice to not store references of arrays but rather
      * Make copy of them
      */
-    fn init(data: u8[]) {
-        this.data = []
-        this.data.extend(data.length)
+    fn init(){
+        this.buffer = []
+        this.charIndicies = []
+        this.rawLen = 0
+        this.utf8Length = 0
+        this.rawCapacity = 0
+        this.charLen = 0
+    }
+    
+    fn init(copy: UTF8String) {
+        this.buffer = copy.buffer
+        this.charIndicies = copy.charIndicies
+        this.rawLen = copy.rawLen
+        this.utf8Length = copy.utf8Length
+        this.rawCapacity = copy.rawCapacity
+        this.charLen = copy.charLen
+    }
+
+    fn init(copy: String) {
+        this.init(copy.bytes())
+    }
+
+    fn init(buffer: u8[]) {
+        this.buffer = []
+        this.buffer.extend(buffer.length)
         
         this.charIndicies = []
-        this.charIndicies.extend(data.length)
+        this.charIndicies.extend(buffer.length)
         
         let i: u64 = 0
         let charCounter: u64 = 0
 
-        while i < data.length {
-            let byte = data[i]
+        while i < buffer.length {
+            let byte = buffer[i]
 
             this.charIndicies[charCounter] = i
             charCounter += 1
@@ -119,25 +175,25 @@ type UTF8String = class String {
 
             if (byte & 0x80) == 0 {        // 1-byte character
                 numBytes = 1
-                this.data[i] = data[i]
+                this.buffer[i] = buffer[i]
             } else if (byte & 0xE0) == 0xC0 { // 2-byte character
                 numBytes = 2
-                this.data[i] = data[i]
-                this.data[i+1] = data[i+1]
+                this.buffer[i] = buffer[i]
+                this.buffer[i+1] = buffer[i+1]
             } else if (byte & 0xF0) == 0xE0 { // 3-byte character
                 numBytes = 3
-                this.data[i] = data[i]
-                this.data[i+1] = data[i+1]
-                this.data[i+2] = data[i+2]
+                this.buffer[i] = buffer[i]
+                this.buffer[i+1] = buffer[i+1]
+                this.buffer[i+2] = buffer[i+2]
             } else if (byte & 0xF8) == 0xF0 { // 4-byte character
                 numBytes = 4
-                this.data[i] = data[i]
-                this.data[i+1] = data[i+1]
-                this.data[i+2] = data[i+2]
-                this.data[i+3] = data[i+3]
+                this.buffer[i] = buffer[i]
+                this.buffer[i+1] = buffer[i+1]
+                this.buffer[i+2] = buffer[i+2]
+                this.buffer[i+3] = buffer[i+3]
             } else {
                 numBytes = 1
-                this.data[i] = data[i]
+                this.buffer[i] = buffer[i]
             }
 
             i += numBytes
@@ -145,8 +201,17 @@ type UTF8String = class String {
 
         this.utf8Length = charCounter
         this.charLen = charCounter
-        this.rawCapacity = data.length
-        this.rawLen = data.length
+        this.rawCapacity = buffer.length
+        this.rawLen = buffer.length
+    }
+
+    fn toString() -> String {
+        return this
+    }
+
+    static fn fromBytes(buffer: u8[]) -> String {
+        let str = new UTF8String(buffer)
+        return str
     }
 
     /**
@@ -164,42 +229,118 @@ type UTF8String = class String {
     }
 
     fn clone() -> String {
-        let str = new UTF8String(this.data)
+        let str = new UTF8String(this.buffer)
         return str
+    }
+
+    fn eq(other: String) -> bool {
+        if this.length() != other.length() {
+            return false
+        }
+
+        let otherBuffer = other.bytes()
+
+        for let i: u64 = 0; i < this.length(); i += 1 {
+            if this.buffer[i] != otherBuffer[i] {
+                return false
+            }
+        }
+
+        return true
     }
 
     /**
      * Returns the byte array representation of the string
      */
     fn bytes() -> u8[] {
-        return this.data
+        return this.buffer
     }
 
     /**
      * Returns the UTF-8 character at the given index
      */
     fn __index__(idx: u64) -> Char {
-        return new Char([this.data[idx]])
+        return new Char([this.buffer[idx]])
     }
 
     /**
-     * Concatenates this string with the given string, overriding this' strings data.
+     * Concatenates this string with the given string, overriding this' strings buffer.
      * returns the same reference
      */
-    fn __add__(other: UTF8String) -> UTF8String {
-        return this.cat_arr(other.bytes())
+    fn __add__(other: UTF8String) -> String {
+        return this.cat(other.bytes(), other.rawLength())
     }
 
-    fn cat_arr(data: u8[]) -> UTF8String {
-        this.data.extend(this.data.length + data.length)
-        this.charIndicies.extend(this.charIndicies.length + data.length)
+    fn __add__(other: u8[]) -> String {
+        return this.cat(other)
+    }
+
+    fn __add__(other: u32) -> String {
+        return this.cat(other)
+    }
+
+    fn __add__(other: i8) -> String {
+        return this.cat(other)
+    }
+
+    fn __add__(other: f32) -> String {
+        return this.cat(other)
+    }
+
+    fn __add__(other: f64) -> String {
+        return this.cat(other)
+    }
+
+    fn __add__(other: bool) -> String {
+        return this.cat(other)
+    }
+
+    fn __add__(other: u8) -> String {
+        return this.cat(other)
+    }
+
+    fn __add__(other: u16) -> String {
+        return this.cat(other)
+    }
+
+    fn __add__(other: u64) -> String {
+        return this.cat(other)
+    }
+
+    fn __add__(other: i16) -> String {
+        return this.cat(other)
+    }
+
+    fn __add__(other: i32) -> String {
+        return this.cat(other)
+    }
+
+    fn __add__(other: i64) -> String {
+        return this.cat(other)
+    }
+
+    fn __add__(other: String) -> String {
+        return this.cat(other)
+    }
+
+    fn cat(buffer: String) -> String {
+        return this.cat(buffer.bytes(), buffer.rawLength())
+    }
+
+    fn cat(buffer: u8[]) -> String {
+        return this.cat(buffer, buffer.length)
+    }
+
+    fn cat(buffer: u8[], len: u64) -> String {
+        this.buffer.extend(this.buffer.length + len)
+        this.charIndicies.extend(this.charIndicies.length + len)
 
         let i: u64 = 0
         let charCounter: u64 = this.charLen
         let offset = this.rawLen
 
-        while i < data.length {
-            let byte = data[i]
+        while i < len {
+            let byte = buffer[i]
 
             this.charIndicies[charCounter] = i
             charCounter += 1
@@ -208,25 +349,25 @@ type UTF8String = class String {
             let numBytes: u8 = 0
             if (byte & 0x80) == 0 {        // 1-byte character
                 numBytes = 1
-                this.data[offset+i] = data[i]
+                this.buffer[offset+i] = buffer[i]
             } else if (byte & 0xE0) == 0xC0 { // 2-byte character
                 numBytes = 2
-                this.data[offset+i] = data[i]
-                this.data[offset+i+1] = data[i+1]
+                this.buffer[offset+i] = buffer[i]
+                this.buffer[offset+i+1] = buffer[i+1]
             } else if (byte & 0xF0) == 0xE0 { // 3-byte character
                 numBytes = 3
-                this.data[offset+i] = data[i]
-                this.data[offset+i+1] = data[i+1]
-                this.data[offset+i+2] = data[i+2]
+                this.buffer[offset+i] = buffer[i]
+                this.buffer[offset+i+1] = buffer[i+1]
+                this.buffer[offset+i+2] = buffer[i+2]
             } else if (byte & 0xF8) == 0xF0 { // 4-byte character
                 numBytes = 4
-                this.data[offset+i] = data[i]
-                this.data[offset+i+1] = data[i+1]
-                this.data[offset+i+2] = data[i+2]
-                this.data[offset+i+3] = data[i+3]
+                this.buffer[offset+i] = buffer[i]
+                this.buffer[offset+i+1] = buffer[i+1]
+                this.buffer[offset+i+2] = buffer[i+2]
+                this.buffer[offset+i+3] = buffer[i+3]
             } else {
                 numBytes = 1
-                this.data[offset+i] = data[i]
+                this.buffer[offset+i] = buffer[i]
             }
 
             i += numBytes
@@ -234,87 +375,87 @@ type UTF8String = class String {
 
         this.utf8Length = charCounter
         this.charLen = charCounter
-        this.rawCapacity += data.length
-        this.rawLen += data.length
+        this.rawCapacity += len
+        this.rawLen += len
 
         return this
     }
 
-    fn cat(other: UTF8String) -> UTF8String {
-        return this.cat_arr(other.bytes())
+    fn cat(other: UTF8String) -> String {
+        return this.cat(other.bytes())
     }
 
-    fn cat_u8(number: u8) -> UTF8String{
-        let c = CastAPI.stringAppend_u8(this.data, number, this.rawLen as u32)
+    fn cat(number: u8) -> String{
+        let c = CastAPI.stringAppend_u8(this.buffer, number, this.rawLen as u32)
         this.rawLen += c
 
         return this
     }
 
-    fn cat_u16(number: u16) -> UTF8String{
-        let c = CastAPI.stringAppend_u16(this.data, number, this.rawLen as u32)
+    fn cat(number: u16) -> String{
+        let c = CastAPI.stringAppend_u16(this.buffer, number, this.rawLen as u32)
         this.rawLen += c
 
         return this
     }
 
-    fn cat_u32(number: u32) -> UTF8String{
-        let c = CastAPI.stringAppend_u32(this.data, number, this.rawLen as u32)
+    fn cat(number: u32) -> String{
+        let c = CastAPI.stringAppend_u32(this.buffer, number, this.rawLen as u32)
         this.rawLen += c
 
         return this
     }
 
-    fn cat_u64(number: u64) -> UTF8String{
-        let c = CastAPI.stringAppend_u64(this.data, number, this.rawLen as u32)
+    fn cat(number: u64) -> String{
+        let c = CastAPI.stringAppend_u64(this.buffer, number, this.rawLen as u32)
         this.rawLen += c
 
         return this
     }
 
-    fn cat_i8(number: i8) -> UTF8String{
-        let c = CastAPI.stringAppend_i8(this.data, number, this.rawLen as u32)
+    fn cat(number: i8) -> String{
+        let c = CastAPI.stringAppend_i8(this.buffer, number, this.rawLen as u32)
         this.rawLen += c
 
         return this
     }
 
-    fn cat_i16(number: i16) -> UTF8String{
-        let c = CastAPI.stringAppend_i16(this.data, number, this.rawLen as u32)
+    fn cat(number: i16) -> String{
+        let c = CastAPI.stringAppend_i16(this.buffer, number, this.rawLen as u32)
         this.rawLen += c
 
         return this
     }
 
-    fn cat_i32(number: i32) -> UTF8String{
-        let c = CastAPI.stringAppend_i32(this.data, number, this.rawLen as u32)
+    fn cat(number: i32) -> String{
+        let c = CastAPI.stringAppend_i32(this.buffer, number, this.rawLen as u32)
         this.rawLen += c
 
         return this
     }
 
-    fn cat_i64(number: i64) -> UTF8String{
-        let c = CastAPI.stringAppend_i64(this.data, number, this.rawLen as u32)
+    fn cat(number: i64) -> String{
+        let c = CastAPI.stringAppend_i64(this.buffer, number, this.rawLen as u32)
         this.rawLen += c
         return this
     }
 
-    fn cat_f32(number: f32) -> UTF8String{
-        let c = CastAPI.stringAppend_f32(this.data, number, this.rawLen as u32)
-        this.rawLen += c
-
-        return this
-    }
-
-    fn cat_f64(number: f64) -> UTF8String{
-        let c = CastAPI.stringAppend_f64(this.data, number, this.rawLen as u32)
+    fn cat(number: f32) -> String{
+        let c = CastAPI.stringAppend_f32(this.buffer, number, this.rawLen as u32)
         this.rawLen += c
 
         return this
     }
 
-    fn cat_bool(number: bool) -> UTF8String{
-        let c = CastAPI.stringAppend_bool(this.data, number, this.rawLen as u32)
+    fn cat(number: f64) -> String{
+        let c = CastAPI.stringAppend_f64(this.buffer, number, this.rawLen as u32)
+        this.rawLen += c
+
+        return this
+    }
+
+    fn cat(number: bool) -> String{
+        let c = CastAPI.stringAppend_bool(this.buffer, number, this.rawLen as u32)
         this.rawLen += c
 
         return this
