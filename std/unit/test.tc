@@ -1,4 +1,4 @@
-from std.strings import String
+from std.string import String
 from std.io import println
 
 type AssertionResult = variant {
@@ -29,7 +29,7 @@ type TestUnit = class {
         this.description = description
         this.runner = runner
         this.results = []
-        //this.state = UnitState.NotProcessed
+        this.state = UnitState.NotProcessed
     }
 
     fn run() -> void {
@@ -80,7 +80,8 @@ type TestUnit = class {
         this.results[this.results.length-1] = result
     }
 
-    fn assert_u8_eq(actual: u8, expected: u8) {
+
+    fn assert_eq<T>(actual: T, expected: T) {
         if actual == expected {
             this.pushResult(AssertionResult.Ok())
         } else {
@@ -88,67 +89,12 @@ type TestUnit = class {
         }
     }
 
-    fn assert_u8_neq(actual: u8, expected: u8) {
-        if actual != expected {
-            this.pushResult(AssertionResult.Ok())
-        } else {
-            this.pushResult(AssertionResult.Failed("Expected " + expected + " but got " + actual))
-        }
-    }
-
-    fn assert_u16_eq(actual: u16, expected: u16) {
+    fn assert_neq<T>(actual: T, expected: T) {
         if actual == expected {
-            this.pushResult(AssertionResult.Ok())
-        } else {
-            this.pushResult(AssertionResult.Failed("Expected " + expected + " but got " + actual))
+            this.pushResult(AssertionResult.Failed("Expected " + expected + " to be != to "+ actual))
         }
-    }
-
-    fn assert_u16_neq(actual: u16, expected: u16) {
-        if actual != expected {
+        else {
             this.pushResult(AssertionResult.Ok())
-        } else {
-            this.pushResult(AssertionResult.Failed("Expected " + expected + " but got " + actual))
-        }
-    }
-
-    fn assert_u32_eq(actual: u32, expected: u32) {
-        if actual == expected {
-            this.pushResult(AssertionResult.Ok())
-        } else {
-            this.pushResult(AssertionResult.Failed("Expected " + expected + " but got " + actual))
-        }
-    }
-
-    fn assert_u32_neq(actual: u32, expected: u32) {
-        if actual != expected {
-            this.pushResult(AssertionResult.Ok())
-        } else {
-            this.pushResult(AssertionResult.Failed("Expected " + expected + " but got " + actual))
-        }
-    }
-
-    fn assert_u64_eq(actual: u64, expected: u64) {
-        if actual == expected {
-            this.pushResult(AssertionResult.Ok())
-        } else {
-            this.pushResult(AssertionResult.Failed("Expected " + expected + " but got " + actual))
-        }
-    }
-
-    fn assert_u64_neq(actual: u64, expected: u64) {
-        if actual != expected {
-            this.pushResult(AssertionResult.Ok())
-        } else {
-            this.pushResult(AssertionResult.Failed("Expected " + expected + " but got " + actual))
-        }
-    }
-
-    fn assert_f32_eq(actual: f32, expected: f32) {
-        if actual == expected {
-            this.pushResult(AssertionResult.Ok())
-        } else {
-            this.pushResult(AssertionResult.Failed("Expected "+expected+" but got "+actual))
         }
     }
 
@@ -156,27 +102,17 @@ type TestUnit = class {
         if actual - expected < precision {
             this.pushResult(AssertionResult.Ok())
         } else {
-            this.pushResult(AssertionResult.Failed("Expected "+expected+" but got "+actual))
+            this.pushResult(AssertionResult.Failed("Expected "+expected+" but got "+actual+ " with a precision of "+precision))
         }
-    }
-
-
-    fn assert_f32_neq(actual: f32, expected: f32) {
-        if actual != expected {
-            this.pushResult(AssertionResult.Ok())
-        } else {
-            this.pushResult(AssertionResult.Failed("Expected "+expected+" but got "+actual))
-        }   
     }
 
     fn assert_f32_neq_pre(actual: f32, expected: f32, precision: f32) {
         if actual - expected > precision {
             this.pushResult(AssertionResult.Ok())
         } else {
-            this.pushResult(AssertionResult.Failed("Expected "+expected+" but got "+actual))
+            this.pushResult(AssertionResult.Failed("Expected "+expected+" to be != to "+actual+ " with a precision of "+precision))
         }
     }
-
 
     fn assert_f64_eq(actual: f64, expected: f64) {
         if actual == expected {
@@ -190,7 +126,7 @@ type TestUnit = class {
         if actual - expected < precision {
             this.pushResult(AssertionResult.Ok())
         } else {
-            this.pushResult(AssertionResult.Failed("Expected "+expected+" but got "+actual))
+            this.pushResult(AssertionResult.Failed("Expected "+expected+" but got "+ " with a precision of "+precision))
         }
     }
 
@@ -199,7 +135,7 @@ type TestUnit = class {
         if actual != expected {
             this.pushResult(AssertionResult.Ok())
         } else {
-            this.pushResult(AssertionResult.Failed("Expected "+expected+" but got "+actual))
+            this.pushResult(AssertionResult.Failed("Expected "+expected+" to be != to "+actual))
         }   
     }
 
@@ -207,7 +143,7 @@ type TestUnit = class {
         if actual - expected > precision {
             this.pushResult(AssertionResult.Ok())
         } else {
-            this.pushResult(AssertionResult.Failed("Expected "+expected+" but got "+actual))
+            this.pushResult(AssertionResult.Failed("Expected "+expected+" to be != to "+actual+ " with a precision of "+precision))
         }
     }
 
@@ -223,7 +159,7 @@ type TestUnit = class {
         if actual.eq(expected) == false {
             this.pushResult(AssertionResult.Ok())
         } else {
-            this.pushResult(AssertionResult.Failed("Expected " + expected.toString() + " but got " + actual.toString()))
+            this.pushResult(AssertionResult.Failed("Expected " + expected.toString() + " to be != to " + actual.toString()))
         }
     }
 
@@ -276,7 +212,7 @@ type UnitSet = class {
         }
     }
 
-    fn run() -> void {
+    fn run() -> u32 {
         let failed = false
         println("Running "+this.name+"...")
         for let i: u64 = 0; i < this.units.length; i += 1 {
@@ -297,5 +233,11 @@ type UnitSet = class {
         } else {
             println("🙌 "+this.name+" has passed")
         }
+
+        if failed {
+            return 1
+        }
+
+        return 0
     }
 }

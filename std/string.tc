@@ -1,6 +1,7 @@
 from std.vm_api.io import io
 from std.vm_api.stdcore import CastAPI
 
+
 type IndexResult = variant {
     Ok(pos: u32),
     NotFound()
@@ -264,6 +265,9 @@ type String = class {
         let offset = this.rawLen
 
         while i < len {
+            //io.print_u64(len)
+            //io.print_u64(buffer.length)
+            //io.print_u64(i)
             let byte = buffer[i]
 
             this.charIndicies[charCounter] = i
@@ -308,6 +312,7 @@ type String = class {
     fn cat(number: u8) -> String{
         let c = CastAPI.stringAppend_u8(this.buffer, number, this.rawLen as u32)
         this.rawLen += c
+        this.utf8Length += c
 
         return this
     }
@@ -315,6 +320,7 @@ type String = class {
     fn cat(number: u16) -> String{
         let c = CastAPI.stringAppend_u16(this.buffer, number, this.rawLen as u32)
         this.rawLen += c
+        this.utf8Length += c
 
         return this
     }
@@ -322,6 +328,7 @@ type String = class {
     fn cat(number: u32) -> String{
         let c = CastAPI.stringAppend_u32(this.buffer, number, this.rawLen as u32)
         this.rawLen += c
+        this.utf8Length += c
 
         return this
     }
@@ -329,6 +336,7 @@ type String = class {
     fn cat(number: u64) -> String{
         let c = CastAPI.stringAppend_u64(this.buffer, number, this.rawLen as u32)
         this.rawLen += c
+        this.utf8Length += c
 
         return this
     }
@@ -336,6 +344,7 @@ type String = class {
     fn cat(number: i8) -> String{
         let c = CastAPI.stringAppend_i8(this.buffer, number, this.rawLen as u32)
         this.rawLen += c
+        this.utf8Length += c
 
         return this
     }
@@ -357,12 +366,14 @@ type String = class {
     fn cat(number: i64) -> String{
         let c = CastAPI.stringAppend_i64(this.buffer, number, this.rawLen as u32)
         this.rawLen += c
+        this.utf8Length += c
         return this
     }
 
     fn cat(number: f32) -> String{
         let c = CastAPI.stringAppend_f32(this.buffer, number, this.rawLen as u32)
         this.rawLen += c
+        this.utf8Length += c
 
         return this
     }
@@ -370,6 +381,7 @@ type String = class {
     fn cat(number: f64) -> String{
         let c = CastAPI.stringAppend_f64(this.buffer, number, this.rawLen as u32)
         this.rawLen += c
+        this.utf8Length += c
 
         return this
     }
@@ -377,6 +389,7 @@ type String = class {
     fn cat(number: bool) -> String{
         let c = CastAPI.stringAppend_bool(this.buffer, number, this.rawLen as u32)
         this.rawLen += c
+        this.utf8Length += c
 
         return this
     }    
