@@ -12,11 +12,6 @@ type UnitState = enum {
     NotProcessed
 }
 
-type T = interface {
-    fn toString() -> String
-    fn eq(other: T) -> bool
-}
-
 type TestUnit = class {
     let name: string
     let description: string
@@ -177,6 +172,14 @@ type TestUnit = class {
         } else {
             this.pushResult(AssertionResult.Failed("Expected not null but got null"))
         }
+    }
+
+    fn assert_unreachable() {
+        this.pushResult(AssertionResult.Failed("Unreachable code reached"))
+    }
+
+    fn assert_reachable() {
+        this.pushResult(AssertionResult.Ok())
     }
 }
 
