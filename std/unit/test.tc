@@ -13,13 +13,13 @@ type UnitState = enum {
 }
 
 type TestUnit = class {
-    let name: string
-    let description: string
+    let name: String
+    let description: String
     let runner: fn (unit: TestUnit) -> void
     let results: AssertionResult[]
     let state: UnitState
 
-    fn init(name: string, description: string, runner: fn (unit: TestUnit) -> void) {
+    fn init(name: String, description: String, runner: fn (unit: TestUnit) -> void) {
         this.name = name
         this.description = description
         this.runner = runner
@@ -186,10 +186,10 @@ type TestUnit = class {
 
 type UnitSet = class {
     let units: TestUnit[]
-    let name: string
-    let description: string
+    let name: String
+    let description: String
 
-    fn init(name: string, description: string, units: TestUnit[]) {
+    fn init(name: String, description: String, units: TestUnit[]) {
         this.name = name
         this.description = description
         this.units = units

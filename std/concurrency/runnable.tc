@@ -1,8 +1,9 @@
 from std.concurrency.ProcessState import ProcessState
 from std.concurrency.Promise import Promise
+from std.string import String
 
 type ProcessError = struct {
-    message: string,
+    message: String,
     code: u32
 }
 
