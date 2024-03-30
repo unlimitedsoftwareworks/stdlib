@@ -1,7 +1,0 @@
-type ProcessState = enum as u8 {
-    Initialized = 0,
-    Halted = 1,
-    Running = 2,
-    Finishing = 3,
-    Killed = 4
-}

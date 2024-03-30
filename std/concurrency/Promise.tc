@@ -1,4 +1,0 @@
-type Promise<T> = interface {
-    fn then(arg: T) -> Promise<T>?
-    fn ok() -> void
-}
