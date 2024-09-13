@@ -61,8 +61,9 @@ type TestUnit = class {
         }
         
         let successCount: u64 = this.results.length - failedCount
-
-        println("Results: "+successCount+"/"+this.results.length)
+        if failed {
+            println("Results: "+successCount+"/"+this.results.length)
+        }
 
     }
 
