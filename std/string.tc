@@ -17,7 +17,7 @@ type Serilizable<T> = interface {
 type Char = class {
     let buffer: u8[]
 
-    fn init(charData: u8[]) {
+    fn init(mut charData: u8[]) {
         this.buffer = charData
     }
 
@@ -73,7 +73,7 @@ type String = class {
         this.charLen = 0
     }
     
-    fn init(copy: String) {
+    fn init(mut copy: String) {
         this.buffer = copy.buffer
         this.charIndicies = copy.charIndicies
         this.rawLen = copy.rawLen
@@ -93,7 +93,7 @@ type String = class {
         let charCounter: u64 = 0
 
         while i < buffer.length {
-            let byte = buffer[i]
+            let const byte = buffer[i]
 
             this.charIndicies[charCounter] = i
             charCounter += 1
@@ -268,7 +268,7 @@ type String = class {
             //io.print_u64(len)
             //io.print_u64(buffer.length)
             //io.print_u64(i)
-            let byte = buffer[i]
+            let const byte = buffer[i]
 
             this.charIndicies[charCounter] = i
             charCounter += 1

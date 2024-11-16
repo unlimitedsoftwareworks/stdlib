@@ -3,7 +3,6 @@
  * @description Default array interface
  * Implemented within the VM level.
  */
-
 type AbstractArray<T> = interface {
     /** x[i] */
     fn __index__(i: u64) -> T
