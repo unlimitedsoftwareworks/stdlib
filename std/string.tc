@@ -405,5 +405,49 @@ type String = class {
             return this.cat(b"true")
         }
         return this.cat(b"false")
-    }    
+    }
+
+
+    /*
+     * Convertion APIs
+     */
+    fn toU8() -> u8 {
+        return CastAPI.stringArray_toU8(this.buffer)
+    }
+
+    fn toU16() -> u16 {
+        return CastAPI.stringArray_toU16(this.buffer)
+    }
+
+    fn toU32() -> u32 {
+        return CastAPI.stringArray_toU32(this.buffer)
+    }
+
+    fn toU64() -> u64 {
+        return CastAPI.stringArray_toU64(this.buffer)
+    }
+
+    fn toI8() -> i8 {
+        return CastAPI.stringArray_toI8(this.buffer)
+    }
+
+    fn toI16() -> i16 {
+        return CastAPI.stringArray_toI16(this.buffer)
+    }
+
+    fn toI32() -> i32 {
+        return CastAPI.stringArray_toI32(this.buffer)
+    }
+
+    fn toI64() -> i64 {
+        return CastAPI.stringArray_toI64(this.buffer)
+    }
+
+    fn toF32() -> f32 {
+        return CastAPI.stringArray_toF32(this.buffer)
+    }
+
+    fn toF64() -> f64 {
+        return CastAPI.stringArray_toF64(this.buffer)
+    }
 }
