@@ -99,4 +99,20 @@ type Array<T> = class AbstractArray<T> {
             f(i, this.data[i])
         }
     }
+
+    fn toIterator() {
+        let iterator = cfn() -> (T, bool) {
+            let counter: u64 = 0
+            
+            for let i: u64 = 0; i < this.len-1; i = i + 1 {
+                let value = this.data[i]
+                yield (value, false)
+            }
+
+            let value = this.data[this.len-1]
+            yield! (value, true)
+        }
+
+        return coroutine iterator
+    }
 }
