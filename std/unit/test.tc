@@ -73,7 +73,7 @@ type TestUnit = class {
 
     fn pushResult(result: AssertionResult) {
         this.results.extend(this.results.length+1)
-        this.results[this.results.length-1] = result
+        this.results[-1] = result
     }
 
 
@@ -198,7 +198,7 @@ type UnitSet = class {
 
     fn addUnit(unit: TestUnit) {
         this.units.extend(this.units.length+1)
-        this.units[this.units.length-1] = unit
+        this.units[-1] = unit
     }
 
     fn report() {
