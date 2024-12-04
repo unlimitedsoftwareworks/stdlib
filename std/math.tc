@@ -1,0 +1,205 @@
+from std.vm_api.stdmath import MathAPI
+
+fn abs(x: f64) -> f64 {
+    return MathAPI.absd(x)
+}
+
+fn abs (x: f32) -> f32 {
+    return MathAPI.absf(x)
+}
+
+fn pow(x: f64, y: f64) -> f64 {
+    return MathAPI.powd(x, y)
+}
+
+fn pow(x: f32, y: f32) -> f32 {
+    return MathAPI.powf(x, y)
+}
+
+fn sqrt(x: f64) -> f64 {
+    return MathAPI.sqrtd(x)
+}
+
+fn sqrt(x: f32) -> f32 {
+    return MathAPI.sqrtf(x)
+}
+
+fn exp(x: f64) -> f64 {
+    return MathAPI.expd(x)
+}
+
+fn exp(x: f32) -> f32 {
+    return MathAPI.expf(x)
+}
+
+fn log(x: f64) -> f64 {
+    return MathAPI.logd(x)
+}
+
+fn log(x: f32) -> f32 {
+    return MathAPI.logf(x)
+}
+
+fn log10(x: f64) -> f64 {
+    return MathAPI.log10d(x)
+}
+
+fn log10(x: f32) -> f32 {
+    return MathAPI.log10f(x)
+}
+
+fn log2(x: f64) -> f64 {
+    return MathAPI.log2d(x)
+}
+
+fn log2(x: f32) -> f32 {
+    return MathAPI.log2f(x)
+}
+
+fn ceil(x: f64) -> f64 {
+    return MathAPI.ceild(x)
+}
+
+fn ceil(x: f32) -> f32 {
+    return MathAPI.ceilf(x)
+}
+
+fn floor(x: f64) -> f64 {
+    return MathAPI.floord(x)
+}
+
+fn floor(x: f32) -> f32 {
+    return MathAPI.floorf(x)
+}
+
+fn round(x: f64) -> f64 {
+    return MathAPI.roundd(x)
+}
+
+fn round(x: f32) -> f32 {
+    return MathAPI.roundf(x)
+}
+
+fn sin(x: f64) -> f64 {
+    return MathAPI.sind(x)
+}
+
+fn sin(x: f32) -> f32 {
+    return MathAPI.sinf(x)
+}
+
+fn cos(x: f64) -> f64 {
+    return MathAPI.cosd(x)
+}
+
+fn cos(x: f32) -> f32 {
+    return MathAPI.cosf(x)
+}
+
+fn tan(x: f64) -> f64 {
+    return MathAPI.tand(x)
+}
+
+fn tan(x: f32) -> f32 {
+    return MathAPI.tanf(x)
+}
+
+fn asin(x: f64) -> f64 {
+    return MathAPI.asind(x)
+}
+
+fn asin(x: f32) -> f32 {
+    return MathAPI.asinf(x)
+}
+
+fn acos(x: f64) -> f64 {
+    return MathAPI.acosd(x)
+}
+
+fn acos(x: f32) -> f32 {
+    return MathAPI.acosf(x)
+}
+
+fn atan(x: f64) -> f64 {
+    return MathAPI.atand(x)
+}
+
+fn atan(x: f32) -> f32 {
+    return MathAPI.atanf(x)
+}
+
+fn sinh(x: f64) -> f64 {
+    return MathAPI.sinhd(x)
+}
+
+fn sinh(x: f32) -> f32 {
+    return MathAPI.sinhf(x)
+}
+
+fn cosh(x: f64) -> f64 {
+    return MathAPI.coshd(x)
+}
+
+fn cosh(x: f32) -> f32 {
+    return MathAPI.coshf(x)
+}
+
+fn tanh(x: f64) -> f64 {
+    return MathAPI.tanhd(x)
+}
+
+fn tanh(x: f32) -> f32 {
+    return MathAPI.tanhf(x)
+}
+
+fn asinh(x: f64) -> f64 {
+    return MathAPI.asinhd(x)
+}
+
+fn asinh(x: f32) -> f32 {
+    return MathAPI.asinhf(x)
+}
+
+fn acosh(x: f64) -> f64 {
+    return MathAPI.acoshd(x)
+}
+
+fn acosh(x: f32) -> f32 {
+    return MathAPI.acoshf(x)
+}
+
+fn atanh(x: f64) -> f64 {
+    return MathAPI.atanhd(x)
+}
+
+fn atanh(x: f32) -> f32 {
+    return MathAPI.atanhf(x)
+}
+
+fn hypot(x: f32, y: f32) -> f32 {
+    return MathAPI.hypotf(x, y)
+}
+
+fn copySign(x: f64, y: f64) -> f64 {
+    return MathAPI.copysignd(x, y)
+}
+
+fn copySign(x: f32, y: f32) -> f32 {
+    return MathAPI.copysignf(x, y)
+}
+
+fn isNaN(x: f64) -> bool {
+    return MathAPI.isnand(x)
+}
+
+fn isNaN(x: f32) -> bool {
+    return MathAPI.isnanf(x)
+}
+
+fn isInfinite(x: f64) -> bool {
+    return MathAPI.isinfd(x)
+}
+
+fn isInfinite(x: f32) -> bool {
+    return MathAPI.isinff(x)
+}

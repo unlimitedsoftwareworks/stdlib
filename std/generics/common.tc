@@ -1,0 +1,5 @@
+
+type Result<T, E> = variant {
+    Ok(value: T),
+    Error(error: E)
+}

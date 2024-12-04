@@ -1,0 +1,110 @@
+from std.collections.abstractList import AbstractList
+from std.generics.common import Result
+
+type LinkedItem<T> = struct {
+    value: T,
+    next: LinkedItem<T>?,
+    prev: LinkedItem<T>?,
+}
+
+fn makeItem<T>(v: T) -> LinkedItem<T> {
+    return {
+        value: v,
+        next: null,
+        prev: null,
+    }
+}
+
+type LinkedList<T> = class AbstractList<T> {
+    let head: LinkedItem<T>?
+    let tail: LinkedItem<T>?
+    let size: u64 
+
+    fn init() {
+        this.head = null
+        this.tail = null
+        this.size = 0
+    } 
+
+    fn len() -> u64 {
+        return this.size
+    }
+
+    fn isEmpty() -> bool {
+        return this.size == 0
+    }
+
+    fn insert(v: T) -> void {
+        let item = makeItem(v)
+
+        if this.head == null {
+            this.head = item
+            this.tail = item
+        } else {
+            if(this.tail != null) {
+                this.tail!.next = item
+                item.prev = this.tail
+                this.tail = item
+            }
+        }
+
+        this.size += 1
+    }
+    
+    fn insertAt(v: T, i: u64) -> void {
+        if i == 0 {
+            let item = makeItem(v)
+            item.next = this.head
+
+            this.head = item
+            this.size += 1
+            return
+        }
+
+        let current: LinkedItem<T>? = this.head
+        for let j: u64 = 0; j < i - 1; j = j + 1 {
+            if current == null {
+                return
+            }
+            current = current!.next
+        }
+
+        if current == null {
+            return
+        }
+
+        let item = makeItem(v)
+        item.next = current!.next
+
+        current!.next = item
+        this.size += 1
+    }
+
+
+    fn get(i: u64) -> Result<T, String> {
+        let current: LinkedItem<T>? = this.head
+        for let j: u64 = 0; j < i; j = j + 1 {
+            if current == null {
+                return Result.Error("Item not found")
+            }
+            current = current?.next
+        }
+
+        if current == null {
+            return Result.Error("Item not found")
+        }
+
+        return Result.Ok(current!.value)
+    }
+
+    fn contains(v: T) -> bool {
+        let current: LinkedItem<T>? = this.head
+        while current != null {
+            if current!.value == v {
+                return true
+            }
+            current = current!.next
+        }
+        return false
+    }
+}
