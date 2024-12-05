@@ -8,3 +8,10 @@ fn print(s: String) -> void {
 fn println(s: String) -> void {
     io.println_string(s.bytes(), s.rawLength())
 }
+
+
+
+type StdOutput = enum {
+    Stdout,
+    Stderr
+}

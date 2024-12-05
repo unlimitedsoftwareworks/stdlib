@@ -20,6 +20,10 @@ type Char = class {
         this.buffer = charData
     }
 
+    fn init(c: u8) {
+        this.buffer = [c]
+    }
+
     fn bytes() -> u8[] {
         return this.buffer
     }
@@ -205,6 +209,12 @@ type String = class {
 
     static fn fromBytes(buffer: u8[]) -> String {
         let str = new String(buffer)
+        return str
+    }
+
+    static fn fromBufferCopy(buffer: u8[]) -> String {
+        let str = new String()
+        str.cat(buffer)
         return str
     }
 
@@ -398,6 +408,10 @@ type String = class {
         return this.cat(b"false")
     }
 
+    fn cat(c: Char) -> String{
+        return this.cat(c.bytes())
+    }
+
     /*
      * Convertion APIs
      */
@@ -440,4 +454,9 @@ type String = class {
     fn toF64() -> f64 {
         return CastAPI.stringArray_toF64(this.buffer)
     }
+
+    fn toCString() -> u8[] {
+        return (new String(this)).cat(b"\0").bytes()
+    }
+
 }

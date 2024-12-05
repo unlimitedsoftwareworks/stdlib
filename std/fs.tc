@@ -1,0 +1,187 @@
+from std.vm_api.fs import fs
+from std.io import println
+
+
+type FileOpenMode = enum as u8{
+    Read = 0x1,
+    Write = 0x2,
+    Append = 0x4,
+    Binary = 0x8,
+    Create = 0x10,
+    Truncate = 0x20,
+    Exclusive = 0x40
+}
+
+type FSError = enum {
+    OK = 0,
+    
+                                    // Generic errors
+    FS_ERROR_INVALID_ARGUMENT,    // Invalid parameter passed
+    FS_ERROR_OUT_OF_MEMORY,       // Memory allocation failed
+    FS_ERROR_BUFFER_TOO_SMALL,    // Provided buffer is too small
+    
+    // Permission/access errors
+    FS_ERROR_PERMISSION_DENIED,   // No permission to access file/dir
+    FS_ERROR_ACCESS_DENIED,       // System denied access (locks etc)
+    
+    // File/path errors
+    FS_ERROR_NOT_FOUND,          // File/directory not found
+    FS_ERROR_ALREADY_EXISTS,     // File/directory already exists
+    FS_ERROR_PATH_TOO_LONG,      // Path exceeds system limits
+    FS_ERROR_NAME_TOO_LONG,      // Filename exceeds system limits
+    FS_ERROR_NOT_DIRECTORY,      // Path is not a directory
+    FS_ERROR_IS_DIRECTORY,       // Path is a directory when file expected
+    FS_ERROR_DIRECTORY_NOT_EMPTY,// Directory not empty on removal
+    
+    // I/O errors
+    FS_ERROR_EOF,               // End of file reached
+    FS_ERROR_DISK_FULL,        // No space left on device
+    FS_ERROR_IO_ERROR,         // Generic I/O error
+    FS_ERROR_BROKEN_PIPE,      // Broken pipe
+    FS_ERROR_INTERRUPTED,      // Operation interrupted
+    FS_ERROR_WOULD_BLOCK,      // Operation would block
+    
+    // System errors
+    FS_ERROR_TOO_MANY_OPEN_FILES, // System limit on open files reached
+    FS_ERROR_NOT_SUPPORTED,     // Operation not supported
+    FS_ERROR_INVALID_HANDLE,    // Invalid file handle
+    FS_ERROR_FILE_TOO_LARGE,    // File is too large
+    // Network filesystem errors
+    FS_ERROR_NETWORK_UNREACHABLE,// Network unreachable
+    FS_ERROR_HOST_UNREACHABLE,  // Host unreachable
+    FS_ERROR_CONNECTION_REFUSED,// Connection refused
+    
+    // Other errors
+    FS_ERROR_UNKNOWN           // Unknown error occurred
+}
+
+type FileAttributes = {
+    // ID of the device containing the file.	
+    deviceId: u64,
+    // File's unique inode number on the filesystem.	
+    inodeNumber: u64,
+    // Number of hard links to the file. Indicates how many directory entries point to this file.	
+    hardLinkCount: u32,
+    // ID of the device, if the file is a special device file (e.g., character or block device).	
+    specialDeviceId: u32,
+    // Preferred block size for filesystem I/O operations for this file.	
+    blockSize: u64,
+    // Number of 512-byte blocks allocated to the file.	
+    blockCount: u64,
+    // Time of the last modification of the file content (in seconds since the epoch).	
+    lastModifiedTime: u64,
+    // Time of the last access to the file (in seconds since the epoch).	
+    lastAccessTime: u64,
+    // Time of the last status change (metadata modification, not content; in seconds since the epoch).	
+    creationOrMetadataChangeTime: u64,
+    // Total size of the file in bytes.	
+    fileSize: u64,
+    // File mode, indicating permissions and file type (e.g., regular file, directory, symbolic link).	
+    fileMode: u32,
+    // User ID of the file owner.	
+    ownerUserId: u32,
+    // Group ID of the file owner.	
+    ownerGroupId: u32
+}
+
+type File = class {
+    let const fileHandler: u64
+
+    fn init(name: String, mode: u8) {
+        let (handler, error) = fs.fs_open(name.toCString(), mode)
+        println("Opening file: " +name + " handler: " + handler+ " error: " + error)
+        if(error) {
+            println("Error opening file: " +name)
+        }
+        this.fileHandler = handler
+    }
+
+    fn write(data: String) -> void {
+        fs.fs_write(this.fileHandler, data.bytes(), data.rawLength())
+    }
+
+    fn readLine() -> String {
+        let (buffer, error) = fs.fs_readline(this.fileHandler)
+        if(error) {
+            println("Error reading line: "+ error)
+            return new String("")
+        }
+        else {
+            return new String(buffer)
+        }
+    }
+
+    fn readAll() -> String {
+        let (buffer, error) = fs.fs_readall(this.fileHandler)
+        if(error) {
+            println("Error reading all")
+            return new String("")
+        }
+        else {
+            return new String(buffer)
+        }
+    }
+
+    fn close() -> void {
+        fs.fs_close(this.fileHandler)
+    }
+}
+
+fn listDir(dir: String) -> String[] {
+    let (files, error) = fs.fs_listdir(dir.toCString())
+    if(error) {
+        println("Error listing dir: " + dir)
+        return []
+    }
+
+    println("Listing dir: " + dir + " found " + files.length + " files")
+
+    for let i: u64 = 0; i < files.length; i = i + 1 {
+        let file = new String(files[i])
+        println("File: " + file)
+    }
+
+    let (dir_, error_) = fs.fs_get_user_directory()
+    println("Current dir: " + new String(dir_))
+}
+
+fn getFileAttributes(filepath: String) -> FileAttributes? {
+    let (
+        gid,
+        uid,
+        mode,
+        size,
+        ctime,
+        atime,
+        mtime,
+        blocks,
+        blksize,
+        rdev,
+        nlink,
+        ino,
+        dev,
+        error
+    ) = fs.fs_get_file_attributes(filepath.toCString())
+
+    if (error) {
+        println("Error getting file attributes: " + error)
+        return null
+    }
+
+    return {
+        deviceId: dev,
+        inodeNumber: ino,
+        hardLinkCount: nlink,
+        specialDeviceId: rdev,
+        blockSize: blksize,
+        blockCount: blocks,
+        lastModifiedTime: mtime,
+        lastAccessTime: atime,
+        creationOrMetadataChangeTime: ctime,
+        fileSize: size,
+        fileMode: mode,
+        ownerUserId: uid,
+        ownerGroupId: gid
+    }
+
+}

@@ -1,0 +1,17 @@
+
+
+type InputStream = interface {
+    fn read() -> u8
+    fn readAll() -> u8[]
+    fn readN(n: u64) -> u8[]
+    fn readLine() -> String
+    fn close() -> void
+}
+
+type OutputStream = interface {
+    fn write(data: u8) -> void
+    fn writeAll(data: u8[]) -> void
+    fn writeString(data: String) -> void
+    fn close() -> void
+}
+
