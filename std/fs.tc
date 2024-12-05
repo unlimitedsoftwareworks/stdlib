@@ -1,5 +1,6 @@
 from std.vm_api.fs import fs
 from std.io import println
+from std.string import Char
 
 
 type FileOpenMode = enum as u8{
@@ -13,46 +14,47 @@ type FileOpenMode = enum as u8{
 }
 
 type FSError = enum {
-    OK = 0,
+    Ok = 0,
     
-                                    // Generic errors
-    FS_ERROR_INVALID_ARGUMENT,    // Invalid parameter passed
-    FS_ERROR_OUT_OF_MEMORY,       // Memory allocation failed
-    FS_ERROR_BUFFER_TOO_SMALL,    // Provided buffer is too small
+    // Generic errors
+    InvalidArgument,   // Invalid parameter passed
+    OutOfMemory,       // Memory allocation failed
+    BufferTooSmall,    // Provided buffer is too small
     
     // Permission/access errors
-    FS_ERROR_PERMISSION_DENIED,   // No permission to access file/dir
-    FS_ERROR_ACCESS_DENIED,       // System denied access (locks etc)
+    PermissionDenied,  // No permission to access file/dir
+    AccessDenied,      // System denied access (locks etc)
     
     // File/path errors
-    FS_ERROR_NOT_FOUND,          // File/directory not found
-    FS_ERROR_ALREADY_EXISTS,     // File/directory already exists
-    FS_ERROR_PATH_TOO_LONG,      // Path exceeds system limits
-    FS_ERROR_NAME_TOO_LONG,      // Filename exceeds system limits
-    FS_ERROR_NOT_DIRECTORY,      // Path is not a directory
-    FS_ERROR_IS_DIRECTORY,       // Path is a directory when file expected
-    FS_ERROR_DIRECTORY_NOT_EMPTY,// Directory not empty on removal
+    NotFound,          // File/directory not found
+    AlreadyExists,     // File/directory already exists
+    PathTooLong,       // Path exceeds system limits
+    NameTooLong,       // Filename exceeds system limits
+    NotDirectory,      // Path is not a directory
+    IsDirectory,       // Path is a directory when file expected
+    DirectoryNotEmpty, // Directory not empty on removal
     
     // I/O errors
-    FS_ERROR_EOF,               // End of file reached
-    FS_ERROR_DISK_FULL,        // No space left on device
-    FS_ERROR_IO_ERROR,         // Generic I/O error
-    FS_ERROR_BROKEN_PIPE,      // Broken pipe
-    FS_ERROR_INTERRUPTED,      // Operation interrupted
-    FS_ERROR_WOULD_BLOCK,      // Operation would block
+    EndOfFile,         // End of file reached
+    DiskFull,          // No space left on device
+    IOError,           // Generic I/O error
+    BrokenPipe,        // Broken pipe
+    Interrupted,       // Operation interrupted
+    WouldBlock,        // Operation would block
     
     // System errors
-    FS_ERROR_TOO_MANY_OPEN_FILES, // System limit on open files reached
-    FS_ERROR_NOT_SUPPORTED,     // Operation not supported
-    FS_ERROR_INVALID_HANDLE,    // Invalid file handle
-    FS_ERROR_FILE_TOO_LARGE,    // File is too large
+    TooManyOpenFiles,  // System limit on open files reached
+    NotSupported,      // Operation not supported
+    InvalidHandle,     // Invalid file handle
+    FileTooLarge,      // File is too large
+    
     // Network filesystem errors
-    FS_ERROR_NETWORK_UNREACHABLE,// Network unreachable
-    FS_ERROR_HOST_UNREACHABLE,  // Host unreachable
-    FS_ERROR_CONNECTION_REFUSED,// Connection refused
+    NetworkUnreachable,// Network unreachable
+    HostUnreachable,   // Host unreachable
+    ConnectionRefused, // Connection refused
     
     // Other errors
-    FS_ERROR_UNKNOWN           // Unknown error occurred
+    UnknownError       // Unknown error occurred
 }
 
 type FileAttributes = {
@@ -100,6 +102,15 @@ type File = class {
         fs.fs_write(this.fileHandler, data.bytes(), data.rawLength())
     }
 
+    fn write(data: u8[]) -> void {
+        fs.fs_write(this.fileHandler, data, data.length)
+    }
+
+    fn writeln(data: String) -> void {
+        this.write(data)
+        this.write(b"\n")
+    }
+
     fn readLine() -> String {
         let (buffer, error) = fs.fs_readline(this.fileHandler)
         if(error) {
@@ -127,6 +138,23 @@ type File = class {
     }
 }
 
+
+fn deleteFile(filepath: String) -> FSError {
+    let error = fs.fs_delete(filepath.toCString())
+    return error
+}
+
+fn mkdir(dir: String) -> FSError {
+    let error = fs.fs_mkdir(dir.toCString())
+    return error
+}
+
+fn rmdir(dir: String) -> FSError {
+    let error = fs.fs_rmdir(dir.toCString())
+    return error
+}
+
+
 fn listDir(dir: String) -> String[] {
     let (files, error) = fs.fs_listdir(dir.toCString())
     if(error) {
@@ -136,13 +164,47 @@ fn listDir(dir: String) -> String[] {
 
     println("Listing dir: " + dir + " found " + files.length + " files")
 
+    let filesList: String[] = []
+    filesList.extend(files.length)
     for let i: u64 = 0; i < files.length; i = i + 1 {
         let file = new String(files[i])
-        println("File: " + file)
+        filesList[i] = file
     }
 
     let (dir_, error_) = fs.fs_get_user_directory()
     println("Current dir: " + new String(dir_))
+
+    return filesList
+}
+
+fn createTemp(name: String) -> String? {
+    let (temp, error) = fs.fs_create_temp(name.toCString())
+    
+    if(error) {
+        return null
+    }
+
+    return new String(temp)
+}
+
+fn getCurrentDirectory() -> String? {
+    let (dir, error) = fs.fs_get_current_directory()
+    
+    if(error) {
+        return null
+    }
+
+    return new String(dir)
+}
+
+fn getUserDirectory() -> String? {
+    let (dir, error) = fs.fs_get_user_directory()
+    
+    if(error) {
+        return null
+    }
+
+    return new String(dir)
 }
 
 fn getFileAttributes(filepath: String) -> FileAttributes? {
@@ -183,5 +245,85 @@ fn getFileAttributes(filepath: String) -> FileAttributes? {
         ownerUserId: uid,
         ownerGroupId: gid
     }
+}
 
+fn chmod(filepath: String, mode: u8) -> FSError {
+    let error = fs.fs_chmod(filepath.toCString(), mode)
+    return error
+}
+
+fn exists(filepath: String) -> bool {
+    let (exists, error) = fs.fs_exists(filepath.toCString())
+    return exists != 0
+}
+
+fn copy(src: String, dest: String) -> FSError {
+    let error = fs.fs_copy(src.toCString(), dest.toCString())
+    return error
+}
+
+fn move(src: String, dest: String) -> FSError {
+    let error = fs.fs_move(src.toCString(), dest.toCString())
+    return error
+}
+
+fn symlink(src: String, dest: String) -> FSError {
+    let error = fs.fs_symlink(src.toCString(), dest.toCString())
+    return error
+}
+
+fn readlink(name: String) -> String? {
+    let (link, error) = fs.fs_readlink(name.toCString())
+    if (error) {
+        return null
+    }
+
+    return new String(link)
+}
+
+fn realpath(name: String) -> String? {
+    let (real, error) = fs.fs_realpath(name.toCString())
+    if (error) {
+        return null
+    }
+
+    return new String(real)
+}
+
+fn getenv(name: String) -> String? {
+    let (value, error) = fs.fs_getenv(name.toCString())
+    if (error) {
+        return null
+    }
+
+    return new String(value)
+}
+
+fn setenv(name: String, value: String, overwrite: bool) -> FSError {
+    let error = fs.fs_setenv(name.toCString(), value.toCString(), overwrite)
+    return error
+}
+
+fn unsetenv(name: String) -> FSError {
+    let error = fs.fs_unsetenv(name.toCString())
+    return error
+}
+
+fn getSeparator() -> Char {
+    let sep = fs.fs_get_separator()
+    return new Char(sep)
+}
+
+fn joinPaths(parts: String[]) -> String {
+    if(parts.length == 0) {
+        return new String("")
+    }
+
+    let base_path = new String(parts[0])
+
+    for let i: u64 = 1; i < parts.length; i = i + 1 {
+        base_path = base_path + getSeparator() + parts[i]
+    }
+
+    return base_path
 }
