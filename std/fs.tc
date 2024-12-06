@@ -111,11 +111,21 @@ type File = class {
         this.write(b"\n")
     }
 
+    fn read(n: u64) -> String {
+        let (buffer, error) = fs.fs_read(this.fileHandler, n)
+        if(error) {
+            return new String()
+        }
+        else {
+            return new String(buffer)
+        }
+    }
+
     fn readLine() -> String {
         let (buffer, error) = fs.fs_readline(this.fileHandler)
         if(error) {
             println("Error reading line: "+ error)
-            return new String("")
+            return new String()
         }
         else {
             return new String(buffer)
@@ -126,7 +136,7 @@ type File = class {
         let (buffer, error) = fs.fs_readall(this.fileHandler)
         if(error) {
             println("Error reading all")
-            return new String("")
+            return new String()
         }
         else {
             return new String(buffer)
@@ -316,7 +326,7 @@ fn getSeparator() -> Char {
 
 fn joinPaths(parts: String[]) -> String {
     if(parts.length == 0) {
-        return new String("")
+        return new String()
     }
 
     let base_path = new String(parts[0])

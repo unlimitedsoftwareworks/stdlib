@@ -1,5 +1,5 @@
 from std.vm_api.io import io
-from std.vm_api.stdcore import CastAPI
+from std.vm_api.stdcore import StdCore
 
 type IndexResult = variant {
     Ok(pos: u32),
@@ -313,7 +313,7 @@ type String = class {
     }
     
     fn cat(number: u8) -> String{
-        let c = CastAPI.stringAppend_u8(this.buffer, number, this.rawLen as u32)
+        let c = StdCore.stringAppend_u8(this.buffer, number, this.rawLen as u32)
         this.rawLen += c
         this.utf8Length += c
 
@@ -321,7 +321,7 @@ type String = class {
     }
 
     fn cat(number: u16) -> String{
-        let c = CastAPI.stringAppend_u16(this.buffer, number, this.rawLen as u32)
+        let c = StdCore.stringAppend_u16(this.buffer, number, this.rawLen as u32)
         this.rawLen += c
         this.utf8Length += c
         this.rawCapacity = this.buffer.length
@@ -330,7 +330,7 @@ type String = class {
     }
 
     fn cat(number: u32) -> String{
-        let c = CastAPI.stringAppend_u32(this.buffer, number, this.rawLen as u32)
+        let c = StdCore.stringAppend_u32(this.buffer, number, this.rawLen as u32)
         this.rawLen += c
         this.utf8Length += c
         this.rawCapacity = this.buffer.length
@@ -339,7 +339,7 @@ type String = class {
     }
 
     fn cat(number: u64) -> String{
-        let c = CastAPI.stringAppend_u64(this.buffer, number, this.rawLen as u32)
+        let c = StdCore.stringAppend_u64(this.buffer, number, this.rawLen as u32)
         this.rawLen += c
         this.utf8Length += c
         this.rawCapacity = this.buffer.length
@@ -348,7 +348,7 @@ type String = class {
     }
 
     fn cat(number: i8) -> String{
-        let c = CastAPI.stringAppend_i8(this.buffer, number, this.rawLen as u32)
+        let c = StdCore.stringAppend_i8(this.buffer, number, this.rawLen as u32)
         this.rawLen += c
         this.utf8Length += c
         this.rawCapacity = this.buffer.length
@@ -357,7 +357,7 @@ type String = class {
     }
 
     fn cat(number: i16) -> String{
-        let c = CastAPI.stringAppend_i16(this.buffer, number, this.rawLen as u32)
+        let c = StdCore.stringAppend_i16(this.buffer, number, this.rawLen as u32)
         this.rawLen += c
         this.utf8Length += c
         this.rawCapacity = this.buffer.length
@@ -366,7 +366,7 @@ type String = class {
     }
 
     fn cat(number: i32) -> String{
-        let c = CastAPI.stringAppend_i32(this.buffer, number, this.rawLen as u32)
+        let c = StdCore.stringAppend_i32(this.buffer, number, this.rawLen as u32)
         this.rawLen += c
         this.utf8Length += c
         this.rawCapacity = this.buffer.length
@@ -375,7 +375,7 @@ type String = class {
     }
 
     fn cat(number: i64) -> String{
-        let c = CastAPI.stringAppend_i64(this.buffer, number, this.rawLen as u32)
+        let c = StdCore.stringAppend_i64(this.buffer, number, this.rawLen as u32)
         this.rawLen += c
         this.utf8Length += c
         this.rawCapacity = this.buffer.length
@@ -384,7 +384,7 @@ type String = class {
     }
 
     fn cat(number: f32) -> String{
-        let c = CastAPI.stringAppend_f32(this.buffer, number, this.rawLen as u32)
+        let c = StdCore.stringAppend_f32(this.buffer, number, this.rawLen as u32)
         this.rawLen += c
         this.utf8Length += c
         this.rawCapacity = this.buffer.length
@@ -393,7 +393,7 @@ type String = class {
     }
 
     fn cat(number: f64) -> String{
-        let c = CastAPI.stringAppend_f64(this.buffer, number, this.rawLen as u32)
+        let c = StdCore.stringAppend_f64(this.buffer, number, this.rawLen as u32)
         this.rawLen += c
         this.utf8Length += c
         this.rawCapacity = this.buffer.length
@@ -416,43 +416,43 @@ type String = class {
      * Convertion APIs
      */
     fn toU8() -> u8 {
-        return CastAPI.stringArray_toU8(this.buffer)
+        return StdCore.stringArray_toU8(this.buffer)
     }
 
     fn toU16() -> u16 {
-        return CastAPI.stringArray_toU16(this.buffer)
+        return StdCore.stringArray_toU16(this.buffer)
     }
 
     fn toU32() -> u32 {
-        return CastAPI.stringArray_toU32(this.buffer)
+        return StdCore.stringArray_toU32(this.buffer)
     }
 
     fn toU64() -> u64 {
-        return CastAPI.stringArray_toU64(this.buffer)
+        return StdCore.stringArray_toU64(this.buffer)
     }
 
     fn toI8() -> i8 {
-        return CastAPI.stringArray_toI8(this.buffer)
+        return StdCore.stringArray_toI8(this.buffer)
     }
 
     fn toI16() -> i16 {
-        return CastAPI.stringArray_toI16(this.buffer)
+        return StdCore.stringArray_toI16(this.buffer)
     }
 
     fn toI32() -> i32 {
-        return CastAPI.stringArray_toI32(this.buffer)
+        return StdCore.stringArray_toI32(this.buffer)
     }
 
     fn toI64() -> i64 {
-        return CastAPI.stringArray_toI64(this.buffer)
+        return StdCore.stringArray_toI64(this.buffer)
     }
 
     fn toF32() -> f32 {
-        return CastAPI.stringArray_toF32(this.buffer)
+        return StdCore.stringArray_toF32(this.buffer)
     }
 
     fn toF64() -> f64 {
-        return CastAPI.stringArray_toF64(this.buffer)
+        return StdCore.stringArray_toF64(this.buffer)
     }
 
     fn toCString() -> u8[] {

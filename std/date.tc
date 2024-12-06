@@ -1,0 +1,47 @@
+from std.vm_api.stdcore import StdCore
+
+type Date = class {
+    let year: u16
+    let month: u8
+    let day: u8
+    let hour: u8
+    let minute: u8
+    let second: u8
+    let millisecond: u16
+
+    fn init() {
+        let (year, month, day, hour, minute, second, millisecond, error) = StdCore.now()
+        this += {year, month, day, hour, minute, second, millisecond}
+    }
+
+    fn init(fmt: String) {
+        let (year, month, day, hour, minute, second, millisecond, error) = StdCore.parse(fmt.toCString())
+        this += {year, month, day, hour, minute, second, millisecond}
+    }
+
+    fn init(utime: i64) {
+        let (year, month, day, hour, minute, second, millisecond, error) = StdCore.fromUnixTimestamp(utime)
+        this += {year, month, day, hour, minute, second, millisecond}
+    }
+
+    fn init(utime: u64) {
+        let (year, month, day, hour, minute, second, millisecond, error) = StdCore.fromUnixTimestamp(utime as i64)
+        this += {year, month, day, hour, minute, second, millisecond}
+    }
+
+    fn init(d: Date) {
+        this += {year: d.year, month: d.month, day: d.day, hour: d.hour, minute: d.minute, second: d.second, millisecond: d.millisecond}
+    }
+
+    fn toUnixTimestamp() -> i64 {
+        let (timestamp, error) = StdCore.toUnixTimestamp(this.year, this.month, this.day, this.hour, this.minute, this.second, this.millisecond)
+        return timestamp
+    }
+
+    fn toString() -> String {
+        let res = new String()
+        res = res + this.year + "-" + this.month + "-" + this.day + " " + this.hour + ":" + this.minute + ":" + this.second + "." + this.millisecond + "UTC"
+
+        return res
+    }
+}

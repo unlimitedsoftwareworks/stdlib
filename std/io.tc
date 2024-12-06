@@ -9,9 +9,11 @@ fn println(s: String) -> void {
     io.println_string(s.bytes(), s.rawLength())
 }
 
-
-
-type StdOutput = enum {
-    Stdout,
-    Stderr
+fn printErr(s: String) -> void {
+    io.print_string_stderr(s.bytes(), s.rawLength())
 }
+
+fn printlnErr(s: String) -> void {
+    io.println_string_stderr(s.bytes(), s.rawLength())
+}
+

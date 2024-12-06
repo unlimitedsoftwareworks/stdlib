@@ -1,6 +1,6 @@
 
 
-extern CastAPI from "stdcore" = {
+extern StdCore from "stdcore" = {
     /**
      * @brief series of functions to Convert numbers to a string.
      * The returned array is preallocated and doesn't use C's null terminated strings.
@@ -58,4 +58,16 @@ extern CastAPI from "stdcore" = {
     fn stringArray_toI32(s: u8[]) -> i32
     fn stringArray_toU64(s: u8[]) -> u64
     fn stringArray_toI64(s: u8[]) -> i64
+
+    /**
+     * Date and time functions
+     */
+    fn now() -> (u16, u8, u8, u8, u8, u8, u16, bool)
+    fn parse(s: u8[]) -> (u16, u8, u8, u8, u8, u8, u16, bool)
+    fn toUnixTimestamp(year: u16, month: u8, day: u8, hour: u8, minute: u8, second: u8, millisecond: u16) -> (i64, bool)
+    fn fromUnixTimestamp(timestamp: i64) -> (u16, u8, u8, u8, u8, u8, u16, bool)
+    fn getDayOfWeek(year: u16, month: u8, day: u8) -> (u8, bool)
+    fn toLocalTime(year: u16, month: u8, day: u8, hour: u8, minute: u8, second: u8, millisecond: u16) -> (u16, u8, u8, u8, u8, u8, u16, bool)
+
+
 }

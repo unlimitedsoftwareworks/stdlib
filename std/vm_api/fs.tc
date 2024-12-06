@@ -4,7 +4,7 @@ extern fs from "stdfs" = {
     fn fs_open(name: u8[], mode: u8) -> (u64, FSError)
     fn fs_close(handler: u64) -> FSError
     // TODO: fix read, must return buffer
-    fn fs_read(handler: u64, data: u8[], length: u64) -> (u64, FSError)
+    fn fs_read(handler: u64, length: u64) -> (u8[], FSError)
     fn fs_readline(handler: u64) -> (u8[], FSError)
     fn fs_readall(handler: u64) -> (u8[], FSError)
     fn fs_write(handler: u64, data: u8[], length: u64) -> (u64, FSError)

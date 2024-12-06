@@ -1,0 +1,131 @@
+from std.fs import File
+from std.io import println, printlnErr
+from std.termcolors import colorize, styles
+from std.date import Date
+
+namespace logging {
+    type LogLevel = enum as u64 {
+        Info = 0,
+        Warn,
+        Error,
+        Critical
+    }
+
+    type LoggerTarget = interface {
+        fn log(level: LogLevel, message: String) -> void
+    }
+
+    type StdOutLogger = class {
+        let const styles: u8[][][]
+        let const titles: String[]
+        let const name: String
+
+        fn init(name: String) {
+            this.styles = [
+                [styles.lightCyanFG],
+                [styles.lightYellowFG],
+                [styles.lightRedFG],
+                [styles.lightRedFG, styles.bold]
+            ]
+
+            this.titles = [
+                "    INFO",
+                "    WARN",
+                "   ERROR",
+                "CRITICAL"
+            ]
+
+            this.name = name
+        }
+
+        fn log(level: LogLevel, message: String) -> void {
+            println((new Date()).toString() + " "+colorize(this.titles[level], this.styles[level]) +" "+ colorize(this.name, [styles.lightBlackFG]) + " " + message)
+        }
+    }
+
+    type StdErrLogger = class {
+        let const styles: u8[][][]
+        let const titles: String[]
+        let const name: String
+
+        fn init(name: String) {
+            this.styles = [
+                [styles.lightCyanFG],
+                [styles.lightYellowFG],
+                [styles.lightRedFG],
+                [styles.lightRedFG, styles.bold]
+            ]
+
+            this.titles = [
+                "    INFO",
+                "    WARN",
+                "   ERROR",
+                "CRITICAL"
+            ]
+
+            this.name = name
+        }
+
+        fn log(level: LogLevel, message: String) -> void {
+            printlnErr((new Date()).toString() + " "+colorize(this.titles[level], this.styles[level]) +" "+ colorize(this.name, [styles.lightBlackFG]) + " " + message)
+        }
+    }
+
+    type LoggerConsoleTarget = enum {
+        Stdout,
+        Stderr
+    }
+
+    type LogTarget = variant {
+        ConsoleLogger(target: LoggerConsoleTarget),
+        File(path: String),
+    }
+
+    type StandardLogger = class {
+        let const target: LoggerTarget
+
+        fn init(name: String, target: LogTarget) {
+            match target {
+                LogTarget.ConsoleLogger(t) {
+                    if t == LoggerConsoleTarget.Stdout {
+                        this.target = new StdOutLogger(name)
+                    } else {
+                        this.target = new StdErrLogger(name)
+                    }
+                }
+
+                LogTarget.File(path) {
+                    unreachable
+                }
+            }
+        }
+
+        fn info(message: String) -> void {
+            this.log(LogLevel.Info, message)
+        }
+
+        fn warn(message: String) -> void {
+            this.log(LogLevel.Warn, message)
+        }
+
+        fn error(message: String) -> void {
+            this.log(LogLevel.Error, message)
+        }
+
+        fn critical(message: String) -> void {
+            this.log(LogLevel.Critical, message)
+        }
+
+        fn log(level: LogLevel, message: String) -> void {
+            this.target.log(level, message)
+        }
+
+        static fn stdoutLogger(name: String) -> StandardLogger {
+            return new StandardLogger(name, LogTarget.ConsoleLogger(LoggerConsoleTarget.Stdout))
+        }
+
+        static fn stderrLogger(name: String) -> StandardLogger {
+            return new StandardLogger(name, LogTarget.ConsoleLogger(LoggerConsoleTarget.Stderr))
+        }
+    }
+}

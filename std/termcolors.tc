@@ -1,0 +1,72 @@
+
+
+namespace styles {
+    /** Defaults **/
+    let const defaultFG = b"\x1b[39m"
+    let const defaultBG = b"\x1b[49m"
+    let const defaultStrike = b"\x1b[29m"
+    let const defaultReveal = b"\x1b[28m"
+    let const defaultInverse = b"\x1b[27m"
+    let const defaultBlink = b"\x1b[25m"
+    let const defaultUnderline = b"\x1b[24m"
+    let const defaultItalic = b"\x1b[23m"
+    let const defaultIntensity = b"\x1b[22m"
+    let const defaultBold = b"\x1b[21m"
+    let const defaultReset = b"\x1b[0m"
+
+    /** Foreground Colors **/
+    let const blackFG = b"\x1b[30m"
+    let const redFG = b"\x1b[31m"
+    let const greenFG = b"\x1b[32m"
+    let const yellowFG = b"\x1b[33m"
+    let const blueFG = b"\x1b[34m"
+    let const magentaFG = b"\x1b[35m"
+    let const cyanFG = b"\x1b[36m"
+    let const whiteFG = b"\x1b[37m"
+    let const lightBlackFG = b"\x1b[90m"
+    let const lightRedFG = b"\x1b[91m"
+    let const lightGreenFG = b"\x1b[92m"
+    let const lightYellowFG = b"\x1b[93m"
+    let const lightBlueFG = b"\x1b[94m"
+    let const lightMagentaFG = b"\x1b[95m"
+    let const lightCyanFG = b"\x1b[96m"
+    let const lightWhiteFG = b"\x1b[97m"
+
+    /** Background Colors **/
+    let const blackBG = b"\x1b[40m"
+    let const redBG = b"\x1b[41m"
+    let const greenBG = b"\x1b[42m"
+    let const yellowBG = b"\x1b[43m"
+    let const blueBG = b"\x1b[44m"
+    let const magentaBG = b"\x1b[45m"
+    let const cyanBG = b"\x1b[46m"
+    let const whiteBG = b"\x1b[47m"
+    let const lightBlackBG = b"\x1b[100m"
+    let const lightRedBG = b"\x1b[101m"
+    let const lightGreenBG = b"\x1b[102m"
+    let const lightYellowBG = b"\x1b[103m"
+    let const lightBlueBG = b"\x1b[104m"
+    let const lightMagentaBG = b"\x1b[105m"
+    let const lightCyanBG = b"\x1b[106m"
+    let const lightWhiteBG = b"\x1b[107m"
+
+    /** Styles **/
+    let const bold = b"\x1b[1m"
+    let const dim = b"\x1b[2m"
+    let const italic = b"\x1b[3m"
+    let const underline = b"\x1b[4m"
+    let const blink = b"\x1b[5m"
+    let const strike = b"\x1b[9m"
+    let const inverse = b"\x1b[7m"
+    let const hide = b"\x1b[8m"
+}
+
+/** Combined Styling Function **/
+fn colorize(text: String, mods: u8[][]) -> String {
+    let combinedStyles = ""
+    for let i: u64 = 0; i < mods.length; i += 1 {
+        combinedStyles += mods[i]
+    }
+
+    return combinedStyles + text + styles.defaultReset + styles.defaultBlink
+}
