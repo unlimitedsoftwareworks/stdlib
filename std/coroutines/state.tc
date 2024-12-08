@@ -1,0 +1,7 @@
+
+type CoroutineState = enum {
+    Ready,
+    Running,
+    Suspended,
+    Finished,
+}

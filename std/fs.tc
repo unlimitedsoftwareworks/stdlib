@@ -263,8 +263,8 @@ fn chmod(filepath: String, mode: u8) -> FSError {
 }
 
 fn exists(filepath: String) -> bool {
-    let (exists, error) = fs.fs_exists(filepath.toCString())
-    return exists != 0
+    let (exists_, error) = fs.fs_exists(filepath.toCString())
+    return exists_ != 0
 }
 
 fn copy(src: String, dest: String) -> FSError {

@@ -1,9 +1,0 @@
-from std.generics.common import Result
-
-type AbstractList<T> = interface {
-    fn insert(v: T) -> void
-    fn get(i: u64) -> Result<T, String>
-    fn len() -> u64
-    fn isEmpty() -> bool
-    fn contains(v: T) -> bool
-}

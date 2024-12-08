@@ -1,0 +1,76 @@
+/**
+ * @file staticArra.ts
+ * @brief Array with a fixed size
+ */
+
+from std.collections.iterator import ArrayIterator
+from std.collections.array import AbstractArray
+
+/**
+ * @brief Static array class
+ * @template T
+ */
+type StaticArray<T> = class AbstractArray<T> {
+    let data: T[]
+    let size: u64
+    let len: u64
+
+    /**
+     * @brief Constructor to initialize with a fixed size
+     * @param size The size of the array
+     */
+    fn init(size: u64) {
+        this += {data: [], size: size, len: 0}
+        this.data.extend(size)
+    }
+
+    /**
+     * @brief Returns the length of the array
+     */
+    fn length() -> u64 {
+        return this.len
+    }
+
+    fn push(v: T) -> void {
+        this.data[this.len] = v
+        this.len = this.len + 1
+    }
+
+    fn pop() -> T {
+        if this.len == 0 {
+            unreachable
+        }
+        this.len = this.len - 1
+        return this.data[this.len]
+    }
+
+    fn [](i: u64) -> T {
+        return this.data[i]
+    }
+
+    fn []= (v: T, i: u64) -> T {
+        this.data[i] = v
+        return v
+    }
+
+    fn [-] (i: u64) -> T {
+        return this.data[-i]
+    }
+
+    fn [-]= (v: T, i: u64) -> T {
+        this.data[-i] = v
+        return v
+    }
+
+    fn clear() {
+        this.len = 0
+    }
+
+    fn isEmpty() -> bool {
+        return this.len == 0
+    }
+
+    fn getIterable() = new ArrayIterator<T>(this)
+}
+
+ 

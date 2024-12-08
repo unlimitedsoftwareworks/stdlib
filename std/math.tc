@@ -1,5 +1,10 @@
 from std.vm_api.stdmath import MathAPI
 
+/**
+ * @brief Computes the absolute value of an f64
+ * @param x 64bits floating point
+ * returns the absolute value of x
+ */
 fn abs(x: f64) -> f64 {
     return MathAPI.absd(x)
 }

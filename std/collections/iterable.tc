@@ -1,6 +1,0 @@
-
-type AbstractIterable<T> = interface  {
-    fn next() -> (u64, T)
-}
-
-

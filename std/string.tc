@@ -276,6 +276,27 @@ type String = class {
         return this.cat(other)
     }
 
+    fn - (other: String) -> i64 {
+        // compares the two strings
+        let len = this.length()
+        let otherLen = other.length()
+
+        let minLength = if len < otherLen => len else otherLen
+
+        for let i: u64 = 0; i < minLength; i += 1 {
+            let c1 = this.buffer[i]
+            let c2 = other.buffer[i]
+
+            if c1 < c2 {
+                return -1
+            } else if c1 > c2 {
+                return 1
+            }
+        }
+
+        return (len - otherLen) as i64
+    }
+
     fn cat(buffer: String) -> String {
         return this.cat(buffer.bytes(), buffer.rawLength())
     }

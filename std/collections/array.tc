@@ -1,66 +1,53 @@
 /**
  * @file array.ts
- * @description Default array interface
+ * @brief Default array interface
  */
 
-type AbstractIterable<T> = interface  {
-    fn next | () () -> (u64, T)
-    fn hasNext() -> bool
-}
-
+from std.collections.iterator import ArrayIterator
+ 
+/**
+ * @brief Abstract array interface
+ * Any Custom array class should implement this interface
+ * @template T
+ */
 type AbstractArray<T> = interface {
-    /** x[i] */
-    fn [](i: u64) -> T
-    /** x[i] = v */
-    fn []=(v: T,i: u64) -> T
-
+    fn [] (i: u64) -> T
+    fn []= (v: T,i: u64) -> T
     fn [-] (i: u64) -> T
-    fn [-]= (v: T, i: u64) -> T
+    fn [-]= (v: T,i: u64) -> T
 
     /**
-     * @description Returns the length of the array
+     * @brief Returns the length of the array
      */
     fn length() -> u64
 
     /**
-     * @description Returns the element at the given index
+     * @brief Returns the element at the given index
      */
     fn push(v: T) -> void
 
     /**
-     * @description Returns the element at the given index
+     * @brief Returns the element at the given index
      */
     fn pop() -> T
+
+    /**
+     * @brief Returns an iterable instance to iterate over the array
+     */
+    fn getIterable() -> ArrayIterator<T>
+
+    /**
+     * @brief Clears the array removing all elements
+     * Must not keep any reference to the elements, so they can be garbage collected
+     */
+    fn clear() 
+
+    /**
+     * @brief checks if the array is empty
+     * return true if the array is empty, false otherwise
+     */
+    fn isEmpty() -> bool
 }
-
-type ArrayIterator<T> = class AbstractIterable<T> {
-    let const array: AbstractArray<T>
-    let index: u64
-
-    // Constructor to initialize with an array
-    fn init(array: AbstractArray<T>) {
-        this.array = array
-        this.index = 0 // Start at the beginning
-    }
-
-    // Return the next element and its index
-    fn next | () () -> (u64, T) {
-        if this.index < this.array.length() {
-            let const value = this.array[this.index]
-            let currentIndex = this.index
-            this.index = this.index + 1 // Move to the next element
-            return (currentIndex, value)
-        }
-        // If out of bounds, indicate end with a null value
-        unreachable
-    }
-
-    // Check if there are more elements
-    fn hasNext() -> bool {
-        return this.index < this.array.length()
-    }
-}
-
 
 type Array<T> = class AbstractArray<T> {
     let data: T[]
@@ -71,6 +58,10 @@ type Array<T> = class AbstractArray<T> {
         this.data = data
         this.len = data.length
         this.capacity = this.len
+    }
+
+    fn init() {
+        this += {data: [], len: 0, capacity: 0}
     }
 
     fn length() -> u64 {
@@ -88,14 +79,13 @@ type Array<T> = class AbstractArray<T> {
  
     fn pop() -> T {
         if this.len == 0 {
-            unreachable
+            
         }
-        
         this.len = this.len - 1
         return this.data[this.len]
     }
 
-    fn [] (i: u64) -> T {
+    fn [](i: u64) -> T {
         return this.data[i]
     }
 
@@ -105,11 +95,11 @@ type Array<T> = class AbstractArray<T> {
     }
 
     fn [-] (i: u64) -> T {
-        return this.data[this.len - i]
+        return this.data[-i]
     }
 
     fn [-]= (v: T, i: u64) -> T {
-        this.data[this.len - i] = v
+        this.data[-i] = v
         return v
     }
 
@@ -142,12 +132,12 @@ type Array<T> = class AbstractArray<T> {
     }
 
     fn forEach<U>(f: fn (i: u64, x: T) -> U) -> void {
-        for let i: u64 = 0; i < this.len; i = i + 1 {
+        for  let i: u64 = 0; i < this.len; i = i + 1 {
             f(i, this.data[i])
         }
     }
 
-    fn toIterator() {
+    fn getCoIterator() {
         let iterator = cfn() -> (T, bool) {
             let counter: u64 = 0
             
@@ -164,4 +154,17 @@ type Array<T> = class AbstractArray<T> {
     }
 
     fn getIterable() = new ArrayIterator<T>(this)
+
+    fn clear() {
+        // reset array to dereference all elements
+        this += {data: [], len: 0, capacity: 0}
+    }
+
+    fn isEmpty() -> bool {
+        return this.len == 0
+    }
+
+    fn getCapacity() -> u64 {
+        return this.capacity
+    }
 }

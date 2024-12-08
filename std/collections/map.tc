@@ -1,0 +1,380 @@
+from std.collections.array import AbstractArray, Array
+
+fn hashString(s: String) -> u64 {
+    let buf = s.bytes()
+    let len = s.rawLength()
+    let hash: u64 = 5381
+
+    for let i: u64 = 0; i < len; i = i + 1 {
+        hash = ((hash << 5) + hash) + (buf[i]) // hash * 33 + c
+    }
+
+    return hash
+}
+
+type AbstractMap<T> = interface {
+    fn get | [] (k: String) -> T
+    fn set | []= (k: String, v: T) -> void
+
+    fn remove | [-](k: String) -> void
+    fn contains(k: String) -> bool
+    fn isEmpty() -> bool
+    fn size() -> u64
+
+    fn items() -> AbstractArray<{key: String, value: T}>
+    fn values() -> AbstractArray<T>
+}
+
+type Map<T> = class AbstractMap<T> {
+    let buckets: {key: String, value: T}[][]
+    let capacity: u64
+    let len: u64
+
+    let hashingFn: fn(s: String) -> u64
+
+    fn init() {
+        this += {
+            capacity: 16,
+            len: 0,
+            buckets: [],
+            hashingFn: hashString
+        }
+
+        this.buckets.extend(this.capacity)
+        for let i: u64 = 0; i < this.capacity; i = i + 1 {
+            this.buckets[i] = []
+        }
+    }
+
+    fn init(capacity: u64) {
+        this += {
+            capacity: capacity,
+            len: 0,
+            buckets: [],
+            hashingFn: hashString
+        }
+
+        this.buckets.extend(this.capacity)
+        for let i: u64 = 0; i < this.capacity; i = i + 1 {
+            this.buckets[i] = []
+        }
+    }
+
+    fn set | []= (k: String, v: T) -> void {
+        let index = this.hashingFn(k) % this.capacity
+        let bucket = this.buckets[index]
+
+        if(bucket.length == 0) {
+            this.buckets[index] = [{k, v}]
+        }
+        else {
+            // search for key
+            let values = bucket
+
+            for let j: u64 = 0; j < values.length; j += 1 {
+                if(values[j].key.eq(k)) {
+                    values[j].value = v
+                    return
+                }
+            }
+
+            // key not found
+            values.extend(values.length + 1)
+            values[-1] = {k, v}
+        }
+        this.len += 1
+
+        if(this.len >=  ((this.capacity * 0.8) as u64)) {
+            this.recomputeLayout()
+        }
+    }
+
+    fn get | [] (k: String) -> T {
+        let index = this.hashingFn(k) % this.capacity
+
+        let bucket = this.buckets[index]
+
+        if(bucket.length == 0) {
+            unreachable
+        }
+
+        for let j: u64 = 0; j < bucket.length; j = j + 1 {
+            if(bucket[j].key.eq(k)) {
+                return bucket[j].value
+            }
+        }
+
+        unreachable
+    }
+
+    fn size() -> u64 {
+        return this.len
+    }
+
+    fn remove | [-] (k: String) -> void {
+        let index = this.hashingFn(k) % this.capacity
+        let bucket = this.buckets[index]
+
+        if(bucket.length == 0) {
+            return
+        }
+
+        for let j: u64 = 0; j < bucket.length; j = j + 1 {
+            if(bucket[j].key.eq(k)) {
+                // from here now we override it with the next element
+                // and resize the array
+                for let i: u64 = j; i < bucket.length - 1; i = i + 1 {
+                    bucket[i] = bucket[i + 1]
+                }
+
+                bucket.extend(bucket.length - 1)
+                this.len = this.len - 1
+            }
+        }
+
+        return
+    }
+
+    fn contains(k: String) -> bool {
+        let index = this.hashingFn(k) % this.capacity
+        let bucket = this.buckets[index]
+
+        if(bucket.length == 0) {
+            return false
+        }
+
+        for let j: u64 = 0; j < bucket.length; j = j + 1 {
+            if(bucket[j].key.eq(k)) {
+                return true
+            }
+        }
+
+        return false
+    }
+
+    fn isEmpty() -> bool {
+        return this.len == 0
+    }
+
+    fn recomputeLayout() {
+        let newCapacity = this.capacity * 2
+        let newBuckets: {key: String, value: T}[][] = []
+        newBuckets.extend(newCapacity)
+        for let i: u64 = 0; i < newCapacity; i = i + 1 {
+            newBuckets[i] = []
+        }
+
+        for let i: u64 = 0; i < this.capacity; i = i + 1 {
+            let bucket = this.buckets[i]
+            for let j: u64 = 0; j < bucket.length; j = j + 1 {
+                let index = this.hashingFn(bucket[j].key) % newCapacity
+                newBuckets[index].extend(newBuckets[index].length + 1)
+                newBuckets[index][-1] = bucket[j]
+            }
+        }
+
+        this.capacity = newCapacity
+        this.buckets = newBuckets
+    }
+
+    fn items() -> AbstractArray<{key: String, value: T}> {
+        let items = new Array<{key: String, value: T}>()
+        for let i: u64 = 0; i < this.capacity; i = i + 1 {
+            let bucket = this.buckets[i]
+            for let j: u64 = 0; j < bucket.length; j = j + 1 {
+                items.push(bucket[j])
+            }
+        }
+        return items
+    }
+
+    fn values() -> AbstractArray<T> {
+        let items = new Array<T>()
+        for let i: u64 = 0; i < this.capacity; i = i + 1 {
+            let bucket = this.buckets[i]
+            for let j: u64 = 0; j < bucket.length; j = j + 1 {
+                items.push(bucket[j].value)
+            }
+        }
+        return items
+    }
+}
+
+type TreeNode<T> = class {
+    let key: String
+    let value: T
+
+    let left: TreeNode<T>?
+    let right: TreeNode<T>?
+
+    fn init(key: String, value: T) {
+        this += {key: key, value: value, left: null, right: null}
+    }
+}
+
+type TreeMap<T> = class  {
+    let root: TreeNode<T>?
+    let comparator: fn(a: String, b: String) -> i64
+
+    fn init(comparator: fn(a: String, b: String) -> i64) {
+        this += {root: null, comparator: comparator}
+    }
+
+    fn init() {
+        this += {
+            root: null,
+            comparator: fn(a: String, b: String) -> i64 {
+                return a - b
+            }
+        }
+    }
+
+    fn set | []= (key: String, value: T) -> void {
+        this.root = this.insert(this.root, key, value)
+    }
+
+    fn get | [] (key: String) -> T {
+        let node = this.find(this.root, key)
+        if node == null {
+            unreachable
+        }
+        return node!.value
+    }
+
+    fn insert(n: TreeNode<T>?, key: String, value: T) -> TreeNode<T> {
+        if n == null {
+            return new TreeNode<T>(key, value)
+        }
+
+        let node = n!
+
+        let cmp = this.comparator(key, node.key)
+        if cmp < 0 {
+            node.left = this.insert(node.left, key, value)
+        }
+        else if cmp > 0 {
+            node.right = this.insert(node.right, key, value)
+        }
+        else {
+            node.value = value
+        }
+
+        return node
+    }
+
+
+    fn min(mut node: TreeNode<T>) -> TreeNode<T> {
+        while node.left != null {
+            node = node.left!
+        }
+        return node
+    }
+
+    fn find(n: TreeNode<T>?, key: String) -> TreeNode<T>? {
+        if n == null {
+            return null
+        }
+
+        let node = n!
+        let cmp = this.comparator(key, node.key)
+
+        if cmp < 0 {
+            return this.find(node.left, key)
+        }
+        else if cmp > 0 {
+            return this.find(node.right, key)
+        }
+        else {
+            return node
+        }
+    }
+
+    fn delete(n: TreeNode<T>?, key: String) -> TreeNode<T>? {
+        if n == null {
+            return null
+        }
+
+        let node = n!
+        let cmp = this.comparator(key, node.key)
+
+        if cmp < 0 {
+            node.left = this.delete(node.left, key)
+        }
+        else if cmp > 0 {
+            node.right = this.delete(node.right, key)
+        }
+        else {
+            if node.left == null {
+                return node.right
+            }
+            else if node.right == null {
+                return node.left
+            }
+
+            let min = this.min(node.right!)
+            node.key = min.key
+            node.value = min.value
+            node.right = this.delete(node.right, min.key)
+        }
+
+        return node
+    }
+
+    fn remove(k: String) -> void {
+        this.delete(this.root, k)
+    }
+
+    fn contains(k: String) -> bool {
+        return this.find(this.root, k) != null
+    }
+    fn isEmpty() -> bool {
+        return this.root == null
+    }
+
+    fn size() -> u64 {
+        return this.countNodes(this.root)
+    }
+
+    fn countNodes(n: TreeNode<T>?) -> u64 {
+        if n == null {
+            return 0
+        }
+
+        let node = n!
+        return 1 + this.countNodes(node.left) + this.countNodes(node.right)
+    }
+
+    fn items() -> AbstractArray<{key: String, value: T}> {
+        let items = new Array<{key: String, value: T}>()
+        this.traverseItems(this.root, items)
+        return items
+    }
+
+    fn values() -> AbstractArray<T> {
+        let items = new Array<T>()
+        this.traverseValues(this.root, items)
+        return items
+    }
+
+    fn traverseItems(n: TreeNode<T>?, items: AbstractArray<{key: String, value: T}>) {
+        if n == null {
+            return
+        }
+
+        let node = n!
+        this.traverseItems(node.left, items)
+        items.push({key: node.key, value: node.value})
+        this.traverseItems(node.right, items)
+    }
+
+    fn traverseValues(n: TreeNode<T>?, items: AbstractArray<T>) {
+        if n == null {
+            return
+        }
+
+        let node = n!
+        this.traverseValues(node.left, items)
+        items.push(node.value)
+        this.traverseValues(node.right, items)
+    }
+}
