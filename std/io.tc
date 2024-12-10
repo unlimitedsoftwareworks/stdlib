@@ -1,6 +1,17 @@
 
 from std.vm_api.io import io
 
+namespace stdio {
+    type StdStream = u64
+    let const stdOut = io.getStdOut()
+    let const stdErr = io.getStdErr()
+
+    fn flush(stream: StdStream) -> void {
+        io.flush(stream)
+    }
+}
+
+
 fn print(s: String) -> void {
     io.print_string(s.bytes(), s.rawLength())
 }

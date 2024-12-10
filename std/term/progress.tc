@@ -1,0 +1,46 @@
+from std.collections.array import AbstractArray
+from std.io import print, println, stdio
+
+
+fn progress<T>(array: AbstractArray<T>, title: String) {
+    let iter = array.getIterable()
+
+    let co = cfn() {
+        let len = array.length()
+        let currentPos: u64 = 0
+        
+        while 1 {
+            if (currentPos == len) {
+                unreachable
+            }
+
+            let prog = (currentPos+1) as f64 / len 
+            let width: u32 = 50
+            let pos = width * prog
+
+            print("\r"+title + "  ")
+
+            for let i: u64 = 0; i < width; i = i + 1 {
+                if i < pos {
+                    print("█")
+                } else {
+                    print("░")
+                }
+            }
+
+            print(" " + (prog * 100.0) + "%")
+
+            if currentPos == len - 1 {
+                // add a newline
+                print("\n")
+                yield! array[currentPos]
+            } else {
+                yield array[currentPos]
+            }
+
+            currentPos += 1
+        }
+    }
+
+    return coroutine co
+}

@@ -1,0 +1,10 @@
+fn transformArgs(args: u8[][]) {
+    let result: String[] = []
+    result.extend(args.length)
+
+    for let i: u64 = 0; i < args.length; i += 1 {
+        result[i] = String.fromBytes(args[i])
+    }
+
+    return result
+}

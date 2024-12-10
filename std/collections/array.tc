@@ -12,9 +12,9 @@ from std.collections.iterator import ArrayIterator
  */
 type AbstractArray<T> = interface {
     fn [] (i: u64) -> T
-    fn []= (v: T,i: u64) -> T
+    fn []= (i: u64, v: T) -> T
     fn [-] (i: u64) -> T
-    fn [-]= (v: T,i: u64) -> T
+    fn [-]= (i: u64, v: T) -> T
 
     /**
      * @brief Returns the length of the array
@@ -89,7 +89,7 @@ type Array<T> = class AbstractArray<T> {
         return this.data[i]
     }
 
-    fn []= (v: T, i: u64) -> T {
+    fn []= (i: u64, v: T) -> T {
         this.data[i] = v
         return v
     }
@@ -98,7 +98,7 @@ type Array<T> = class AbstractArray<T> {
         return this.data[-i]
     }
 
-    fn [-]= (v: T, i: u64) -> T {
+    fn [-]= (i: u64, v: T) -> T {
         this.data[-i] = v
         return v
     }
