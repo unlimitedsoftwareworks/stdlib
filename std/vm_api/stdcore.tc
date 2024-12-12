@@ -1,6 +1,7 @@
 
 
 extern StdCore from "stdcore" = {
+    fn load_runtimeEnv(name: u8[]) -> u8[]
     /**
      * @brief series of functions to Convert numbers to a string.
      * The returned array is preallocated and doesn't use C's null terminated strings.
@@ -68,6 +69,4 @@ extern StdCore from "stdcore" = {
     fn fromUnixTimestamp(timestamp: i64) -> (u16, u8, u8, u8, u8, u8, u16, bool)
     fn getDayOfWeek(year: u16, month: u8, day: u8) -> (u8, bool)
     fn toLocalTime(year: u16, month: u8, day: u8, hour: u8, minute: u8, second: u8, millisecond: u16) -> (u16, u8, u8, u8, u8, u8, u16, bool)
-
-
 }

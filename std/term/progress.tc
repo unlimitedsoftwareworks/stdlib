@@ -14,11 +14,11 @@ fn progress<T>(array: AbstractArray<T>, title: String) {
                 unreachable
             }
 
-            let prog = (currentPos+1) as f64 / len 
+            let prog = (currentPos+1) as f64 / len
             let width: u32 = 50
             let pos = width * prog
 
-            print("\r"+title + "  ")
+            print("\r"+title + " | ")
 
             for let i: u64 = 0; i < width; i = i + 1 {
                 if i < pos {
@@ -28,7 +28,7 @@ fn progress<T>(array: AbstractArray<T>, title: String) {
                 }
             }
 
-            print(" " + (prog * 100.0) + "%")
+            print(" | " + (prog * 100.0) + "%" + " | " + (currentPos+1) + "/" + len)
 
             if currentPos == len - 1 {
                 // add a newline
