@@ -6,8 +6,7 @@ from std.io import println
  */
 fn loadCLIArgs() -> u8[][] {
     // unsafe cast necessary
-    let args = StdCore.load_runtimeEnv("args".toCString()) as! u8[][]
-    println("Initial args" + args.length)
+    let args = StdCore.load_runtimeEnv(b"args") as! u8[][]
 
     return args
 }

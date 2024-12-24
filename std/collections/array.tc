@@ -137,7 +137,11 @@ type Array<T> = class AbstractArray<T> {
         }
     }
 
-    fn getCoIterator() {
+    /**
+     * @brief Returns a coiterator to iterate over the array
+     * retruns null if the array is empty
+     */
+    fn getCoIterator() -> coroutine<cfn() -> (T, bool)>? {
         let iterator = cfn() -> (T, bool) {
             let counter: u64 = 0
             
@@ -150,6 +154,9 @@ type Array<T> = class AbstractArray<T> {
             yield! (value, true)
         }
 
+        if this.isEmpty() {
+            return null
+        }
         return coroutine iterator
     }
 
