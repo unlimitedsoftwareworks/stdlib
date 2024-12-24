@@ -13,6 +13,14 @@ fn abs (x: f32) -> f32 {
     return MathAPI.absf(x)
 }
 
+fn abs(x: i32) -> i32 {
+    return MathAPI.abs_i32(x)
+}
+
+fn abs(x: i64) -> i64 {
+    return MathAPI.abs_i64(x)
+}
+
 fn pow(x: f64, y: f64) -> f64 {
     return MathAPI.powd(x, y)
 }

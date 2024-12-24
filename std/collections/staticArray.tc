@@ -48,7 +48,7 @@ type StaticArray<T> = class AbstractArray<T> {
         return this.data[i]
     }
 
-    fn []= (v: T, i: u64) -> T {
+    fn []= (i: u64, v: T) -> T {
         this.data[i] = v
         return v
     }
@@ -57,7 +57,7 @@ type StaticArray<T> = class AbstractArray<T> {
         return this.data[-i]
     }
 
-    fn [-]= (v: T, i: u64) -> T {
+    fn [-]= (i: u64, v: T) -> T {
         this.data[-i] = v
         return v
     }
