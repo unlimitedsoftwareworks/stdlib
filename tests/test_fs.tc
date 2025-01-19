@@ -1,0 +1,94 @@
+from std.fs import *
+from std.unit.test import TestUnit, UnitSet
+from std.io import println
+from std.path import path
+
+fn testGetCurrentDirectory(rn: TestUnit) {
+    let const cwd = fs.getCurrentDirectory()
+    rn.assert_obj_not_null(cwd)
+}
+
+fn testFileOps(rn: TestUnit) {
+    let const filename = "randomfile.txt"
+    let const file = new File(filename, FileOpenMode.Write | FileOpenMode.Create)
+
+    let const line1 = "hello, world!"
+    let const line2 = "Cool stuff!"
+    file.writeln(line1)
+    file.writeln(line2)
+    file.close()
+
+    let const exists = fs.exists(filename)
+    rn.assert_eq(exists, true)
+
+    let const file2 = new File(filename, FileOpenMode.Read)
+    let const readLine1 = file2.readLine()
+    let const readLine2 = file2.readLine()
+    rn.assert_obj_eq(readLine1, line1)
+    rn.assert_obj_eq(readLine2, line2)
+    file2.close()
+
+    let const errRm = fs.deleteFile(filename)
+    rn.assert_eq(errRm, FSError.Ok)
+
+    let const existsAfterRm = fs.exists(filename)
+    rn.assert_eq(existsAfterRm, false)
+}
+
+fn testFileOps2(rn: TestUnit) {
+    let const file = File.fromTemp()
+    let const filename = file.path
+    let const tempExists = fs.exists(file.path)
+    rn.assert_eq(tempExists, true)
+
+    let const line1 = "Tere Tulemast!"
+    let const line2 = "That was 'welcome' in Estonian"
+    file.writeln(line1)
+    file.writeln(line2)
+    file.close()
+
+    // copy the file to cwd
+    let const cwd = fs.getCurrentDirectory()
+    rn.assert_obj_not_null(cwd)
+    let const dest = path.join(cwd!, "hakuna_matata.txt")
+    let const cpError = fs.copy(filename, dest)
+    rn.assert_eq(cpError, FSError.Ok)
+    let const cpExists = fs.exists(dest)
+    rn.assert_eq(cpExists, true)
+
+
+    let const file2 = new File(dest, FileOpenMode.Read)
+    let const readLine1 = file2.readLine()
+    let const readLine2 = file2.readLine()
+    rn.assert_obj_eq(readLine1, line1)
+    rn.assert_obj_eq(readLine2, line2)
+    file2.close()
+
+    let const destDir = path.join(cwd!, "hidden_dir")
+    let const mkdirErr = fs.mkdir(destDir)
+    let const dirExists = fs.exists(destDir)
+    rn.assert_eq(dirExists, true)
+    let const mvDest = path.join(destDir, "someFile.txt")
+    let const mvError = fs.move(dest, mvDest)
+    rn.assert_eq(mvError, FSError.Ok)
+    let const cpExistsAfterMv = fs.exists(dest)
+    rn.assert_eq(cpExistsAfterMv, false)
+    let const mvExists = fs.exists(mvDest)
+    rn.assert_eq(mvExists, true)
+    let const rmFileErr = fs.deleteFile(mvDest)
+    let const mvExistsAfterRm = fs.exists(mvDest)
+    rn.assert_eq(mvExistsAfterRm, false)
+    let const rmDirErr = fs.rmdir(destDir)
+    rn.assert_eq(rmDirErr, FSError.Ok)
+}
+
+fn buildFSTestSet() -> UnitSet {
+    let const t1 = new TestUnit("test 1", "Tests fs.getCurrentWorkingDirctory", testGetCurrentDirectory)
+    let const t2 =  new TestUnit("test 1", "Tests fs.create/write/delete", testFileOps)
+    let const t3 =  new TestUnit("test 1", "Tests copy/move", testFileOps2)
+    return new UnitSet(
+        "Tests std.fs",
+        "Tests std.fs",
+        [t1, t2, t3]
+    )
+}

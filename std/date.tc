@@ -1,5 +1,9 @@
 from std.vm_api.stdcore import StdCore
 
+/**
+ * Date class
+ * Not to be confused with IRL date which i know nothing about
+ */
 type Date = class {
     let year: u16
     let month: u8
@@ -8,7 +12,7 @@ type Date = class {
     let minute: u8
     let second: u8
     let millisecond: u16
-
+    
     fn init() {
         let (year, month, day, hour, minute, second, millisecond, error) = StdCore.now()
         this += {year, month, day, hour, minute, second, millisecond}

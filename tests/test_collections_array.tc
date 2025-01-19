@@ -1,0 +1,88 @@
+from std.collections.array import Array
+from std.unit.test import TestUnit, UnitSet
+
+fn test_init(rn: TestUnit) {
+    let values = [1, 2, 3]
+    let arr = new Array<u8>(values)
+
+    rn.assert_eq(arr.length(), 3)
+    rn.assert_eq(arr.len, 3)
+    rn.assert_eq(values.length, 3)
+    rn.assert_eq(arr.data.length, 3)
+
+    for let i = 0; i < values.length; i += 1 {
+        let const actual = values[i]
+        let const expected = arr[i]
+        rn.assert_eq(actual, expected)
+    }
+
+    let arr2 = new Array<String[]>()
+    rn.assert_eq(arr2.len, arr2.length())
+    rn.assert_eq(arr2.len, 0)
+    rn.assert_eq(arr2.data.length, 0)
+}
+
+fn test_push_pop(rn: TestUnit) {
+    let values = [1, 2, 3]
+    let arr = new Array<u8>(values)
+    let gt_1 = [1, 2, 3, 1, 2, 3]
+
+    arr.push(1)
+    arr.push(2)
+    arr.push(3)
+
+    rn.assert_eq(arr.length(), 6)
+    
+    for let i = 0 ; i < 6; i += 1 {
+        rn.assert_eq(arr[i], gt_1[i])
+    }
+
+    let v1 = arr.pop()
+    rn.assert_eq(v1, 3)
+
+    let v2 = arr.pop()
+    rn.assert_eq(v2, 2)
+
+    arr.push(2)
+    arr.push(3)
+
+    arr.push([1, 2, 3])
+    arr.push(new Array<u8>([1, 2, 3]))
+
+    rn.assert_eq(arr.length(), 12)
+
+    let gt_2 = [1,2,3, 1,2,3, 1,2,3, 1,2,3]
+
+    for let i = 1, j = 11 ; i < gt_2.length; i+= 1, j-=1 {
+        rn.assert_eq(arr[-i], gt_2[j])
+    }
+ 
+    arr[0] = 10
+    rn.assert_eq(arr[0], 10)
+
+    arr[1] = 20
+    rn.assert_eq(arr[1], 20)
+
+    arr[-1] = 30
+    rn.assert_eq(arr[-1], 30)
+    arr[-2] = 40
+    rn.assert_eq(arr[-2], 40)
+
+    while !arr.isEmpty() {
+        arr.pop()
+    }
+
+    rn.assert_eq(arr.isEmpty(), true)
+    rn.assert_eq(arr.length(), 0)
+}
+
+fn buildArrayTestSet() -> UnitSet {
+    let const test_1 = new TestUnit("test 1", "Tests array constructor", test_init)
+    let const test_2 = new TestUnit("test 2", "Tests array push/pop", test_push_pop)
+
+    return new UnitSet(
+        "Test Array",
+        "Test std.collections.Array API",
+        [test_1, test_2]
+    )
+}

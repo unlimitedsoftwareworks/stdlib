@@ -1,0 +1,11 @@
+/**
+ * @brief: Models an Optional value, i.e a value which is potentially
+ * non-exsiting.
+ * Usage: let v: Optional<u32> = Optional.Value(3)
+ * Check if value is present: if v is Optional.Value
+ */
+
+type Optional<T> = variant {
+    Value(v: T),
+    None()
+}

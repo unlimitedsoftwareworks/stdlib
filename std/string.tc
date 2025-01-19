@@ -11,7 +11,9 @@ type Serilizable<T> = interface {
 }
 
 /**
- * UTF8-Character
+ * UTF8-Character, 
+ * not to be confused with ASCII character,
+ * a utf8-character can have more than 1 byte
  */
 type Char = class {
     let buffer: u8[]
@@ -123,7 +125,7 @@ namespace stringUtils {
 }
 
 /**
- * UTF8-String
+ * @brief UTF8-String
  * TODO:
  * - add allocated length and actual length
  * - call new stringAppend ... for adding numbers

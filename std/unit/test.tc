@@ -244,4 +244,26 @@ type UnitSet = class {
 
         return 0
     }
+
+    fn reportFaultyCase() {
+        foreach const unit in this.units {
+            if unit.state == UnitState.Failed {
+                unit.report()
+            }
+        }
+    }
+
+    /**
+     * @brief: Run the set without printing or reporting.
+     * Useful for a custom display/reporting
+     */
+    fn runSilent() -> u32 {
+        let failed = false
+        for let i: u64 = 0; i < this.units.length; i += 1 {
+            this.units[i].run()
+            failed = failed || this.units[i].check()
+        }
+
+        return if failed => 1 else 0
+    }
 }

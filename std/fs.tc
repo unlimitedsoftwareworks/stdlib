@@ -1,4 +1,4 @@
-from std.vm_api.fs import fs
+from std.vm_api.fs import fs as fs_api
 from std.io import println
 from std.string import Char
 
@@ -88,22 +88,40 @@ type FileAttributes = {
 
 type File = class {
     let const fileHandler: u64
+    let const path: String
 
-    fn init(name: String, mode: u8) {
-        let (handler, error) = fs.fs_open(name.toCString(), mode)
-        println("Opening file: " +name + " handler: " + handler+ " error: " + error)
+    fn init(path: String, mode: u8) {
+        let (handler, error) = fs_api.fs_open(path.toCString(), mode)
         if(error) {
-            println("Error opening file: " +name)
+            println("Error opening file: " +path)
         }
         this.fileHandler = handler
+        this.path = path
+    }
+
+    /**
+     * Used to create a file from existing attributes
+     */
+    fn init(path: String, fileHandler: u64){
+        this += {path, fileHandler}
+    }
+
+    static fn fromTemp() {
+        let (filepath, handler, error) = fs_api.fs_create_temp()
+        
+        if(error) {
+            throw "Couldn't create temporary file"
+        }
+
+        return new File(String.fromBytes(filepath), handler)
     }
 
     fn write(data: String) -> void {
-        fs.fs_write(this.fileHandler, data.bytes(), data.rawLength())
+        fs_api.fs_write(this.fileHandler, data.bytes(), data.rawLength())
     }
 
     fn write(data: u8[]) -> void {
-        fs.fs_write(this.fileHandler, data, data.length)
+        fs_api.fs_write(this.fileHandler, data, data.length)
     }
 
     fn writeln(data: String) -> void {
@@ -112,7 +130,7 @@ type File = class {
     }
 
     fn read(n: u64) -> String {
-        let (buffer, error) = fs.fs_read(this.fileHandler, n)
+        let (buffer, error) = fs_api.fs_read(this.fileHandler, n)
         if(error) {
             return new String()
         }
@@ -122,7 +140,7 @@ type File = class {
     }
 
     fn readLine() -> String {
-        let (buffer, error) = fs.fs_readline(this.fileHandler)
+        let (buffer, error) = fs_api.fs_readline(this.fileHandler)
         if(error) {
             println("Error reading line: "+ error)
             return new String()
@@ -133,7 +151,7 @@ type File = class {
     }
 
     fn readAll() -> String {
-        let (buffer, error) = fs.fs_readall(this.fileHandler)
+        let (buffer, error) = fs_api.fs_readall(this.fileHandler)
         if(error) {
             println("Error reading all")
             return new String()
@@ -144,196 +162,177 @@ type File = class {
     }
 
     fn close() -> void {
-        fs.fs_close(this.fileHandler)
+        fs_api.fs_close(this.fileHandler)
     }
 }
 
-
-fn deleteFile(filepath: String) -> FSError {
-    let error = fs.fs_delete(filepath.toCString())
-    return error
-}
-
-fn mkdir(dir: String) -> FSError {
-    let error = fs.fs_mkdir(dir.toCString())
-    return error
-}
-
-fn rmdir(dir: String) -> FSError {
-    let error = fs.fs_rmdir(dir.toCString())
-    return error
-}
-
-
-fn listDir(dir: String) -> String[] {
-    let (files, error) = fs.fs_listdir(dir.toCString())
-    if(error) {
-        println("Error listing dir: " + dir)
-        return []
+namespace fs {
+    /**
+     * @brief: Deletes a file.
+     * @return: Error to be verified.
+     */
+    fn deleteFile(filepath: String) -> FSError {
+        let error = fs_api.fs_delete(filepath.toCString())
+        return error
     }
 
-    println("Listing dir: " + dir + " found " + files.length + " files")
-
-    let filesList: String[] = []
-    filesList.extend(files.length)
-    for let i: u64 = 0; i < files.length; i = i + 1 {
-        let file = new String(files[i])
-        filesList[i] = file
+    /**
+     * @brief: Creates a directory
+     * @return: Error
+     */
+    fn mkdir(dir: String) -> FSError {
+        let error = fs_api.fs_mkdir(dir.toCString())
+        return error
     }
 
-    let (dir_, error_) = fs.fs_get_user_directory()
-    println("Current dir: " + new String(dir_))
-
-    return filesList
-}
-
-fn createTemp(name: String) -> String? {
-    let (temp, error) = fs.fs_create_temp(name.toCString())
-    
-    if(error) {
-        return null
+    fn rmdir(dir: String) -> FSError {
+        let error = fs_api.fs_rmdir(dir.toCString())
+        return error
     }
 
-    return new String(temp)
-}
 
-fn getCurrentDirectory() -> String? {
-    let (dir, error) = fs.fs_get_current_directory()
-    
-    if(error) {
-        return null
+    fn listDir(dir: String) -> String[] {
+        let (files, error) = fs_api.fs_listdir(dir.toCString())
+        if(error) {
+            // throw "Error"
+            return []
+        }
+
+        let filesList: String[] = []
+        filesList.extend(files.length)
+        for let i: u64 = 0; i < files.length; i = i + 1 {
+            let file = new String(files[i])
+            filesList[i] = file
+        }
+
+        let (dir_, error_) = fs_api.fs_get_user_directory()
+        return filesList
     }
 
-    return new String(dir)
-}
+    fn getCurrentDirectory() -> String? {
+        let (dir, error) = fs_api.fs_get_current_directory()
+        
+        if(error) {
+            return null
+        }
 
-fn getUserDirectory() -> String? {
-    let (dir, error) = fs.fs_get_user_directory()
-    
-    if(error) {
-        return null
+        return new String(dir)
     }
 
-    return new String(dir)
-}
+    fn getUserDirectory() -> String? {
+        let (dir, error) = fs_api.fs_get_user_directory()
+        
+        if(error) {
+            return null
+        }
 
-fn getFileAttributes(filepath: String) -> FileAttributes? {
-    let (
-        gid,
-        uid,
-        mode,
-        size,
-        ctime,
-        atime,
-        mtime,
-        blocks,
-        blksize,
-        rdev,
-        nlink,
-        ino,
-        dev,
-        error
-    ) = fs.fs_get_file_attributes(filepath.toCString())
-
-    if (error) {
-        println("Error getting file attributes: " + error)
-        return null
+        return new String(dir)
     }
 
-    return {
-        deviceId: dev,
-        inodeNumber: ino,
-        hardLinkCount: nlink,
-        specialDeviceId: rdev,
-        blockSize: blksize,
-        blockCount: blocks,
-        lastModifiedTime: mtime,
-        lastAccessTime: atime,
-        creationOrMetadataChangeTime: ctime,
-        fileSize: size,
-        fileMode: mode,
-        ownerUserId: uid,
-        ownerGroupId: gid
-    }
-}
+    fn getFileAttributes(filepath: String) -> FileAttributes? {
+        let (
+            gid,
+            uid,
+            mode,
+            size,
+            ctime,
+            atime,
+            mtime,
+            blocks,
+            blksize,
+            rdev,
+            nlink,
+            ino,
+            dev,
+            error
+        ) = fs_api.fs_get_file_attributes(filepath.toCString())
 
-fn chmod(filepath: String, mode: u8) -> FSError {
-    let error = fs.fs_chmod(filepath.toCString(), mode)
-    return error
-}
+        if (error) {
+            println("Error getting file attributes: " + error)
+            return null
+        }
 
-fn exists(filepath: String) -> bool {
-    let (exists_, error) = fs.fs_exists(filepath.toCString())
-    return exists_ != 0
-}
-
-fn copy(src: String, dest: String) -> FSError {
-    let error = fs.fs_copy(src.toCString(), dest.toCString())
-    return error
-}
-
-fn move(src: String, dest: String) -> FSError {
-    let error = fs.fs_move(src.toCString(), dest.toCString())
-    return error
-}
-
-fn symlink(src: String, dest: String) -> FSError {
-    let error = fs.fs_symlink(src.toCString(), dest.toCString())
-    return error
-}
-
-fn readlink(name: String) -> String? {
-    let (link, error) = fs.fs_readlink(name.toCString())
-    if (error) {
-        return null
+        return {
+            deviceId: dev,
+            inodeNumber: ino,
+            hardLinkCount: nlink,
+            specialDeviceId: rdev,
+            blockSize: blksize,
+            blockCount: blocks,
+            lastModifiedTime: mtime,
+            lastAccessTime: atime,
+            creationOrMetadataChangeTime: ctime,
+            fileSize: size,
+            fileMode: mode,
+            ownerUserId: uid,
+            ownerGroupId: gid
+        }
     }
 
-    return new String(link)
-}
-
-fn realpath(name: String) -> String? {
-    let (real, error) = fs.fs_realpath(name.toCString())
-    if (error) {
-        return null
+    fn chmod(filepath: String, mode: u8) -> FSError {
+        let error = fs_api.fs_chmod(filepath.toCString(), mode)
+        return error
     }
 
-    return new String(real)
-}
-
-fn getenv(name: String) -> String? {
-    let (value, error) = fs.fs_getenv(name.toCString())
-    if (error) {
-        return null
+    fn exists(filepath: String) -> bool {
+        let (exists_, error) = fs_api.fs_exists(filepath.toCString())
+        return exists_ != 0
     }
 
-    return new String(value)
-}
-
-fn setenv(name: String, value: String, overwrite: bool) -> FSError {
-    let error = fs.fs_setenv(name.toCString(), value.toCString(), overwrite)
-    return error
-}
-
-fn unsetenv(name: String) -> FSError {
-    let error = fs.fs_unsetenv(name.toCString())
-    return error
-}
-
-fn getSeparator() -> Char {
-    let sep = fs.fs_get_separator()
-    return new Char(sep)
-}
-
-fn joinPaths(parts: String[]) -> String {
-    if(parts.length == 0) {
-        return new String()
+    fn copy(src: String, dest: String) -> FSError {
+        let error = fs_api.fs_copy(src.toCString(), dest.toCString())
+        return error
     }
 
-    let base_path = new String(parts[0])
-
-    for let i: u64 = 1; i < parts.length; i = i + 1 {
-        base_path = base_path + getSeparator() + parts[i]
+    fn move(src: String, dest: String) -> FSError {
+        let error = fs_api.fs_move(src.toCString(), dest.toCString())
+        return error
     }
 
-    return base_path
+    fn symlink(src: String, dest: String) -> FSError {
+        let error = fs_api.fs_symlink(src.toCString(), dest.toCString())
+        return error
+    }
+
+    fn readlink(path: String) -> String? {
+        let (link, error) = fs_api.fs_readlink(path.toCString())
+        if (error) {
+            return null
+        }
+
+        return new String(link)
+    }
+
+    fn realpath(path: String) -> String? {
+        let (real, error) = fs_api.fs_realpath(path.toCString())
+        if (error) {
+            return null
+        }
+
+        return new String(real)
+    }
+
+    fn getenv(path: String) -> String? {
+        let (value, error) = fs_api.fs_getenv(path.toCString())
+        if (error) {
+            return null
+        }
+
+        return new String(value)
+    }
+
+    fn setenv(path: String, value: String, overwrite: bool) -> FSError {
+        let error = fs_api.fs_setenv(path.toCString(), value.toCString(), overwrite)
+        return error
+    }
+
+    fn unsetenv(path: String) -> FSError {
+        let error = fs_api.fs_unsetenv(path.toCString())
+        return error
+    }
+
+    fn getSeparator() -> Char {
+        let sep = fs_api.fs_get_separator()
+        return new Char(sep)
+    }
 }

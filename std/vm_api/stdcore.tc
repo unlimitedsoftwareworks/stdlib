@@ -27,10 +27,10 @@ extern StdCore from "stdcore" = {
      * data that was in the string, between the pos argument and actual number of bytes pasted.
      * 
      * Returns the number of characters appended.
-     * @param s The string to append to
-     * @param number The number to append
-     * @param pos The position to append at
-     * @returns The number of characters appended
+     * @param s: The string to append to
+     * @param number: The number to append
+     * @param pos: The position to append at
+     * @returns: The number of characters appended
      */
     fn stringAppend_f64(s: u8[], number: f64, pos: u32) -> u32
     fn stringAppend_f32(s: u8[], number: f32, pos: u32) -> u32

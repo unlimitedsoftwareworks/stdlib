@@ -1,0 +1,122 @@
+from std.path import path
+from std.unit.test import TestUnit, UnitSet
+from std.io import println
+
+fn test_basename(rn: TestUnit) {
+    let const p = "/my/path.txt"
+    let const basename = path.basename(p)
+
+    rn.assert_obj_eq(basename, "path.txt")
+}
+
+fn testChangeBasename(rn: TestUnit) {
+    let const p = "/usr/opt/file.txt"
+    let const res = path.changeBasename(p, "movie.mp4")
+
+    rn.assert_obj_eq(res, "/usr/opt/movie.mp4")
+}
+
+fn testGetDirname(rn: TestUnit) {
+    let const p = "/usr/opt/file.txt"
+    let const res = path.dirname(p)
+
+    rn.assert_obj_eq(res, "/usr/opt/")
+}
+
+fn testRoot(rn: TestUnit) {
+    let const p = "/usr/opt/file.txt"
+    let const res = path.root(p)
+
+    rn.assert_obj_eq(res, "/")
+}
+
+fn testSetRoot(rn: TestUnit) {
+    let const p = "C:\\files\\"
+    let const res = path.changeRoot(p, "D:\\")
+
+    // This is a windows thing 
+    //rn.assert_obj_eq(res, "D:\\files")
+}
+
+fn testIsAbsolute(rn: TestUnit) {
+    let const p = "/usr/opt/file.txt"
+    let const res = path.isAbsolute(p)
+
+    rn.assert_eq(res, true)
+
+    let const p2 = "usr/opt/file.txt"
+    let const res2 = path.isAbsolute(p2)
+
+    rn.assert_eq(res2, false)
+}
+
+fn testIsRelative(rn: TestUnit) {
+    let const p = "usr/opt/file.txt"
+    let const res = path.isRelative(p)
+
+    rn.assert_eq(res, true)
+
+    let const p2 = "/usr/opt/file.txt"
+    let const res2 = path.isRelative(p2)
+
+    rn.assert_eq(res2, false)
+}
+
+fn testJoin(rn: TestUnit) {
+    let const p1 = "/usr/opt"
+    let const p2 = "file.txt"
+    let const res = path.join(p1, p2)
+
+    rn.assert_obj_eq(res, "/usr/opt/file.txt")
+}
+
+fn testNormalize(rn: TestUnit) {
+    let const p = "/usr/opt/../file.txt"
+    let const res = path.normalize(p)
+
+    rn.assert_obj_eq(res, "/usr/file.txt")
+
+    let const p2 = "/usr/opt/../../usr/opt/file.txt"
+    let const res2 = path.normalize(p2)
+
+    rn.assert_obj_eq(res2, "/usr/opt/file.txt")
+
+    let const p3 = "/var/log/weird/////path/.././..///"
+    let const res3 = path.normalize(p3)
+
+    rn.assert_obj_eq(res3, "/var/log")
+}
+
+fn testIntersection(rn: TestUnit) {
+    let const p1 = "/test/abc/../foo/bar"
+    let const p2 = "/test/foo/har"
+    let const res1 = path.intersection(p1, p2)
+
+    rn.assert_obj_eq(res1, "/test/abc/../foo")
+
+
+    let const p3 = "/test/foo/har"
+    let const p4 = "/test/abc/../foo/bar"
+    let const res2 = path.intersection(p3, p4)
+
+    rn.assert_obj_eq(res2, "/test/foo")
+}
+
+fn buildPathTestSet() -> UnitSet {
+    let const t1 = new TestUnit("test 1", "Tests path.basename", test_basename)
+    let const t2 = new TestUnit("test 2", "Tests path.changeBasename", testChangeBasename)
+    let const t3 = new TestUnit("test 3", "Tests path.dirname", testGetDirname)
+    let const t4 = new TestUnit("test 4", "Tests path.root", testRoot)
+    let const t5 = new TestUnit("test 5", "Tests path.changeRoot", testSetRoot)
+    let const t6 = new TestUnit("test 6", "Tests path.isAbsolute", testIsAbsolute)
+    let const t7 = new TestUnit("test 7", "Tests path.isRelative", testIsRelative)
+    let const t8 = new TestUnit("test 8", "Tests path.join", testJoin)
+    let const t9 = new TestUnit("test 9", "Tests path.normalize", testNormalize)
+    let const t10 = new TestUnit("test 10", "Tests path.intersection", testIntersection)
+
+    return new UnitSet(
+        "Tests std.path",
+        "Tests std.path",
+        [t1, t2, t3, t4, t5, t6, t7, t8, t9, t10]
+    )
+}

@@ -1,0 +1,33 @@
+from std.logging import logging
+from tests.test_collections_array import buildArrayTestSet
+from tests.test_path import buildPathTestSet
+from tests.test_fs import buildFSTestSet
+
+fn main() -> u32 {
+    let logger = logging.StandardLogger.stdoutLogger("StdlibUnitTest")
+    logger.info("Begin stdlib tests")
+    
+    let const tests = [
+        buildArrayTestSet(),
+        buildPathTestSet(),
+        buildFSTestSet()
+    ]
+
+    foreach const i, test in tests {
+        logger.info("Test #"+i+": "+test.name)
+        let res = test.runSilent()
+
+        if (res != 0) {
+            logger.critical("Test #`"+i+": "+test.name+"` has failed")
+            test.report()
+            test.reportFaultyCase()
+        }
+        else {
+            logger.info("Test #"+i+": [OK]")
+        }
+    }
+
+    logger.info("testing finished")
+
+    return 0
+}

@@ -17,7 +17,7 @@ extern fs from "stdfs" = {
     fn fs_mkdir(name: u8[]) -> FSError
     fn fs_rmdir(name: u8[]) -> FSError
     fn fs_listdir(name: u8[]) -> (u8[][], FSError)
-    fn fs_create_temp(name: u8[]) -> (u8[], FSError)
+    fn fs_create_temp() -> (u8[], u64, FSError)
     fn fs_get_current_directory() -> (u8[], FSError)
     fn fs_get_user_directory() -> (u8[], FSError)
     fn fs_get_file_attributes(name: u8[]) -> (u32, u32, u32, u64, u64, u64, u64, u64, u64, u32, u32, u64, u64, FSError)
@@ -32,4 +32,19 @@ extern fs from "stdfs" = {
     fn fs_setenv(name: u8[], value: u8[], overwrite: bool) -> FSError
     fn fs_unsetenv(name: u8[]) -> FSError
     fn fs_get_separator() -> u8
+
+    /**
+     * Path API
+     */
+    fn path_get_basename(path: u8[]) -> u8[]
+    fn path_change_basename(path: u8[], newBaseName: u8[]) -> u8[]
+    fn path_get_dirname(path: u8[]) -> u8[]
+    fn path_get_root(path: u8[]) -> u8[]
+    fn path_change_root(path: u8[], newRoot: u8[]) -> u8[]
+    fn path_is_absolute(path: u8[]) -> bool
+    fn path_is_relative(path: u8[]) -> bool
+    fn path_join(path1: u8[], path2: u8[]) -> u8[]
+    fn path_normalize(path: u8[]) -> u8[]
+    fn path_intersection(path1: u8[], path2: u8[]) -> u8[]
+
 }

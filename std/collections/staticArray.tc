@@ -8,6 +8,8 @@ from std.collections.array import AbstractArray
 
 /**
  * @brief Static array class
+ * A static array is an array whos size is fixed, but the content 
+ * can change
  * @template T
  */
 type StaticArray<T> = class AbstractArray<T> {
@@ -25,26 +27,32 @@ type StaticArray<T> = class AbstractArray<T> {
     }
 
     /**
-     * @brief Returns the length of the array
+     * @brief 
+     * @returns: the length of the array
      */
     fn length() -> u64 {
         return this.len
     }
 
+    /**
+     * @brief: Pushes an element into the array,
+     * 
+     */
     fn push(v: T) -> void {
         this.data[this.len] = v
         this.len = this.len + 1
     }
 
+
     fn pop() -> T {
         if this.len == 0 {
-            unreachable
+            throw "Cannot pop an empty array"
         }
         this.len = this.len - 1
         return this.data[this.len]
     }
 
-    fn [](i: u64) -> T {
+    fn [] (i: u64) -> T {
         return this.data[i]
     }
 

@@ -1,0 +1,61 @@
+from std.vm_api.fs import fs
+
+namespace path {
+    fn basename(path: String) {
+        let const buffer = fs.path_get_basename(path.toCString())
+        return String.fromBytes(buffer)
+    }
+
+    fn changeBasename(path: String, newBasename: String) {
+        let const buffer = fs.path_change_basename(
+            path.toCString(),
+            newBasename.toCString()
+        )
+        return String.fromBytes(buffer)
+    }
+
+    fn dirname(path: String) {
+        let const buffer = fs.path_get_dirname(path.toCString())
+        return String.fromBytes(buffer)
+    }
+
+
+    fn root(path: String) {
+        let const buffer = fs.path_get_root(path.toCString())
+        return String.fromBytes(buffer)
+    }
+
+    fn changeRoot(path: String, newRoot: String) {
+        let const buffer = fs.path_change_root(
+            path.toCString(),
+            newRoot.toCString()
+        )
+        return String.fromBytes(buffer)
+    }
+
+    fn isAbsolute(path: String) {
+        return fs.path_is_absolute(path.toCString())
+    }
+
+    fn isRelative(path: String) {
+        return fs.path_is_relative(path.toCString())
+    }
+
+    fn join(path1: String, path2: String) {
+        return String.fromBytes(
+            fs.path_join(path1.toCString(), path2.toCString())
+        )
+    }
+
+    fn normalize(path: String) {
+        return String.fromBytes(
+            fs.path_normalize(path.toCString())
+        )
+    }
+
+    fn intersection(path1: String, path2: String) {
+        return String.fromBytes(
+            fs.path_intersection(path1.toCString(), path2.toCString())
+        )
+    }
+}
