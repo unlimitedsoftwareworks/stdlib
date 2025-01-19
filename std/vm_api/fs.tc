@@ -3,13 +3,13 @@ from std.fs import FSError
 extern fs from "stdfs" = { 
     fn fs_open(name: u8[], mode: u8) -> (u64, FSError)
     fn fs_close(handler: u64) -> FSError
-    // TODO: fix read, must return buffer
+    fn fs_read_one(handler: u64, length: u64) -> (u8, FSError)
     fn fs_read(handler: u64, length: u64) -> (u8[], FSError)
     fn fs_readline(handler: u64) -> (u8[], FSError)
     fn fs_readall(handler: u64) -> (u8[], FSError)
     fn fs_write(handler: u64, data: u8[], length: u64) -> (u64, FSError)
-    fn fs_seek(handler: u64, offset: u64, whence: u8) -> FSError
-    fn fs_tell(handler: u64) -> (u64, FSError)
+    fn fs_seek(handler: u64, offset: i64, whence: u8) -> FSError
+    fn fs_tell(handler: u64) -> (i64, FSError)
     fn fs_eof(handler: u64) -> (u8, FSError)
     fn fs_flush(handler: u64) -> FSError
     fn fs_file_size(handler: u64) -> (u64, FSError)

@@ -13,8 +13,9 @@ fn main() -> u32 {
         buildFSTestSet()
     ]
 
+    logger.info("Running "+tests.length+" tests")
+
     foreach const i, test in tests {
-        logger.info("Test #"+i+": "+test.name)
         let res = test.runSilent()
 
         if (res != 0) {
@@ -27,7 +28,7 @@ fn main() -> u32 {
         }
     }
 
-    logger.info("testing finished")
+    logger.info("All tests have passed")
 
     return 0
 }

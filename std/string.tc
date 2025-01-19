@@ -481,5 +481,4 @@ type String = class {
     fn toCString() -> u8[] {
         return (new String(this)).cat(b"\0").bytes()
     }
-
 }

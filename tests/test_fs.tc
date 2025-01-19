@@ -82,13 +82,29 @@ fn testFileOps2(rn: TestUnit) {
     rn.assert_eq(rmDirErr, FSError.Ok)
 }
 
+fn testSimpleFS(rn: TestUnit) {
+    let const content = "{hello\nworld!}"
+    let const filename = "le_file.txt"
+    fs.writeFile(filename, content)
+    let const exists = fs.exists(filename)
+    rn.assert_eq(exists, true)
+
+    let const readContent = fs.readFile(filename)
+    rn.assert_obj_eq(content, readContent)
+
+    fs.deleteFile(filename)
+    let const existsAfterRm = fs.exists(filename)
+    rn.assert_eq(existsAfterRm, false)
+}
+
 fn buildFSTestSet() -> UnitSet {
     let const t1 = new TestUnit("test 1", "Tests fs.getCurrentWorkingDirctory", testGetCurrentDirectory)
-    let const t2 =  new TestUnit("test 1", "Tests fs.create/write/delete", testFileOps)
-    let const t3 =  new TestUnit("test 1", "Tests copy/move", testFileOps2)
+    let const t2 =  new TestUnit("test 2", "Tests fs.create/write/delete", testFileOps)
+    let const t3 =  new TestUnit("test 3", "Tests copy/move", testFileOps2)
+    let const t4 =  new TestUnit("test 4", "Tests writeFile/readFile", testSimpleFS)
     return new UnitSet(
         "Tests std.fs",
         "Tests std.fs",
-        [t1, t2, t3]
+        [t1, t2, t3, t4]
     )
 }

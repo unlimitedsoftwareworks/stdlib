@@ -1,7 +1,7 @@
 from std.vm_api.fs import fs as fs_api
 from std.io import println
 from std.string import Char
-
+import std.stream
 
 type FileOpenMode = enum as u8{
     Read = 0x1,
@@ -86,6 +86,98 @@ type FileAttributes = {
     ownerGroupId: u32
 }
 
+type InputFileStream = class SeekableStream, InputStream {
+    let const handler: u64
+    let const path: String
+    let const open: bool
+
+    fn init(path: String) {
+        let (handler, error) = fs_api.fs_open(
+            path.toCString(), FileOpenMode.Read
+        )
+
+        if error {
+            throw "Error opening file `"+path+"`, error code "+error
+        }
+
+        this += {handler: handler, path: path, open: true}
+    }
+
+    /**
+     * Makes sure the file is readable
+     */
+    fn ready() -> bool = this.open
+
+    fn seek(offset: i64) -> bool {
+        let err = fs_api.fs_seek(this.handler, offset, SeekOrigin.Absolute)
+        return err == FSError.Ok
+    }
+
+    fn seek(offset: i64, origin: SeekOrigin) {
+        let err = fs_api.fs_seek(this.handler, offset, origin)
+        return err == FSError.Ok
+    }
+
+    fn tell() -> i64 {
+        let (pos, err) = fs_api.fs_tell(this.handler)
+        if err {
+            throw "Couldn't tell file `"+this.path+"` error code: "+err
+        }
+        return pos
+    }
+
+    fn read() -> u8 {
+        let const (data, err) = fs_api.fs_read_one(this.handler, 1)
+        if err != FSError.Ok {
+            throw "Failed to read 1 byte from file `"+this.path+"`, error code: "+err
+        }
+
+        return data
+    }
+
+    fn readAll() -> u8[] {
+        let const (data, err) = fs_api.fs_readall(this.handler)
+        if err {
+            throw "Failed to read data from `"+this.path+"`, error code: "+err
+        }
+
+        return data
+    }
+
+    fn readN(n: u64) -> u8[] {
+        let const (data, err) = fs_api.fs_read(this.handler, n)
+
+        if err {
+            throw "Failed to read data from `"+this.path+"`, error code: "+err
+        }
+
+        return data
+    }
+
+    fn readLine() -> String? {
+        let const (data, err) = fs_api.fs_readline(this.handler)
+        if err {
+            throw "Failed to read data from `"+this.path+"`, error code: "+err
+        }
+
+        return String.fromBytes(data)
+    }
+
+    fn close() {
+        if !this.open {
+            return
+        }
+
+        let err = fs_api.fs_close(this.handler)
+
+        if err {
+            throw "Failed to close file `"+this.path+"`, error code: "+err
+        }
+
+        this.open = false
+    }
+}
+
 type File = class {
     let const fileHandler: u64
     let const path: String
@@ -167,6 +259,59 @@ type File = class {
 }
 
 namespace fs {
+    /**
+     * @brief Open the File and writes the given string into it
+     * Does not return an error but throws an exception on failure.
+     * @param filepath: File to create and write into (will be overwritten if exists)
+     * @param content: Content to write in the file
+     */
+    fn writeFile(filepath: String, content: String) {
+        let (handle, err) = fs_api.fs_open(
+            filepath.toCString(), FileOpenMode.Create | FileOpenMode.Write
+        )
+
+        if err {
+            throw "Failed to create file `"+filepath +"` error code: "+err
+        }
+
+        let (_, writeErr) = fs_api.fs_write(handle, content.toCString(), content.length())
+
+        if writeErr {
+            throw "Failed to write content into file `"+filepath+"` error code: "+writeErr
+        }
+
+        let closeErr = fs_api.fs_close(handle)
+
+        if closeErr {
+            throw "Failed to close file `"+filepath+"` error code: "+closeErr
+        }
+    }
+
+    fn readFile(filepath: String) -> String {
+        let (handle, err) = fs_api.fs_open(
+            filepath.toCString(), FileOpenMode.Read
+        )
+
+        if err {
+            throw "Failed to open file "+filepath
+        }
+
+        let (buffer, readErr) = fs_api.fs_readall(handle)
+
+        if readErr {
+            throw "Failed to read content from file"
+        }
+
+        let closeErr = fs_api.fs_close(handle)
+
+        if closeErr {
+            throw "Failed to close file "+filepath
+        }
+
+        return String.fromBytes(buffer)
+    }
+
+    
     /**
      * @brief: Deletes a file.
      * @return: Error to be verified.

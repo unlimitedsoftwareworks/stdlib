@@ -1,9 +1,21 @@
 Type-C Standard Library
 ===
 
-This repository contains the source code of the Type-C Standard Library. 
-The library contains 2 parts:
-- FFI declarations: These are the type declarations of the C modules, that are used by the library and parts of the VM.
-- Type-C Standard Library: The standard library, built on top of the FFI declarations.
+Type-C standard library.
 
-It is important to provide layers of abstraction between the low level FFI and the high level standard library.
+structure:
+- `std/vm_api/*`: FFI which uses libraries exported by Type-V. Usually requires wrappers
+- `std/*`: Standard Library
+- `tests/*`: Unit test cases
+- `./testall.tc`: Unit test runner.
+
+|package|description|state|tests|
+|:---|:---|:---|:---|
+|`fs.tc`|Filesystem IO|in progress|partial|
+|`streams.tc`|Abstract Streams|in progress|no|
+|`string`|UTF8 Strings|in progress|no|
+|`math`|Math|in progress|no|
+|`logging.tc`|Logging, only console logging for now|in progress|no|
+|`date.tc`|Time & Date|in progress|no|
+|`collections`|Array, Map, Iterators, etc|in progress|no|
+|`unit.test`|Unit testing|Working|no|
