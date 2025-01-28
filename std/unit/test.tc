@@ -163,7 +163,7 @@ type TestUnit = class {
         if actual == null {
             this.pushResult(AssertionResult.Ok())
         } else {
-            this.pushResult(AssertionResult.Failed("Expected null but got " + actual!.toString()))
+            this.pushResult(AssertionResult.Failed("Expected null object but got non-null"))
         }
     }
 
@@ -171,7 +171,7 @@ type TestUnit = class {
         if actual != null {
             this.pushResult(AssertionResult.Ok())
         } else {
-            this.pushResult(AssertionResult.Failed("Expected not null but got null"))
+            this.pushResult(AssertionResult.Failed("Expected non-null object but got null"))
         }
     }
 
