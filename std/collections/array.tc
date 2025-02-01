@@ -5,6 +5,11 @@
 
 from std.collections.iterator import ArrayIterator
  
+type NullableResult<T> = variant {
+    Ok(value: T),
+    Null()
+}
+
 /**
  * @brief Abstract array interface
  * Any Custom array class should implement this interface
@@ -141,40 +146,6 @@ type Array<T> = class AbstractArray<T> {
         return v
     }
 
-    fn map<Z>(f: fn (x: T) -> Z) -> Array<Z> {
-        let result1 = new Array<Z>([])
-        for let i: u64 = 0; i < this.len; i += 1 {
-            result1.push(f(this.data[i]))
-        }
-
-        return result1
-    }
-
-    fn filter(f: fn (x: T) -> bool) -> Array<T> {
-        let result2 = new Array<T>([])
-        
-        for let i: u64 = 0; i < this.len; i = i + 1 {
-            if f(this.data[i]) {
-                result2.push(this.data[i])
-            }
-        }
-        return result2
-    }
-
-    fn reduce(f: fn (x: T, y: T) -> T) -> T {
-        let result3 = this.data[0]
-        for let i: u64 = 1; i < this.len; i = i + 1 {
-            result3 = f(result3, this.data[i])
-        }
-        return result3
-    }
-
-    fn forEach<U>(f: fn (i: u64, x: T) -> U) -> void {
-        for let i: u64 = 0; i < this.len; i = i + 1 {
-            f(i, this.data[i])
-        }
-    }
-
     /**
      * @brief Returns a coiterator to iterate over the array
      * retruns null if the array is empty
@@ -211,5 +182,114 @@ type Array<T> = class AbstractArray<T> {
 
     fn getCapacity() -> u64 {
         return this.capacity
+    }
+
+    fn contains(e: T) {
+        for let i: u64 = 0; i < this.len; i += 1 {
+            if(this[i] == e) {
+                return true
+            }
+        }
+
+        return false
+    }
+
+    fn map<Z>(f: fn (x: T) -> Z) -> Array<Z> {
+        let result1 = new Array<Z>([])
+        for let i: u64 = 0; i < this.len; i += 1 {
+            result1.push(f(this.data[i]))
+        }
+
+        return result1
+    }
+
+    fn filter(f: fn (x: T) -> bool) -> Array<T> {
+        let result2 = new Array<T>([])
+        
+        for let i: u64 = 0; i < this.len; i = i + 1 {
+            if f(this.data[i]) {
+                result2.push(this.data[i])
+            }
+        }
+        return result2
+    }
+
+    fn reduce(f: fn (x: T, y: T) -> T) -> T {
+        let result3 = this.data[0]
+        for let i: u64 = 1; i < this.len; i = i + 1 {
+            result3 = f(result3, this.data[i])
+        }
+        return result3
+    }
+
+    fn forEach<U>(f: fn (i: u64, x: T) -> U) -> void {
+        for let i: u64 = 0; i < this.len; i = i + 1 {
+            f(i, this.data[i])
+        }
+    }
+
+    fn some(f: fn(x: T) -> bool) {
+        for let i: u64 = 0; i < this.len; i += 1 {
+            if f(this[i]) {
+                return true
+            }
+        }
+
+        return false
+    }
+
+    fn every(f: fn(x: T) -> bool) {
+        for let i: u64 = 0; i < this.len; i += 1 {
+            if !f(this[i]) {
+                return false
+            }
+        }
+
+        return true
+    }
+
+
+    fn find(f: fn(x: T) -> bool) -> NullableResult<T> {
+        for let i: u64 = 0; i < this.len; i += 1 {
+            let value = this[i]
+            if f(value) {
+                return NullableResult.Ok<T>(value)
+            }
+        }
+
+        return NullableResult.Null<T>()
+    }
+
+    fn findIndex(f: fn(x: T) -> bool) -> NullableResult<u64> {
+        for let i: u64 = 0; i < this.len; i += 1 {
+            let value = this[i]
+            if f(value) {
+                return NullableResult.Ok<u64>(i)
+            }
+        }
+
+        return NullableResult.Null<u64>()
+    }
+
+    fn findLast(f: fn(x: T) -> bool) -> NullableResult<T> {
+        if this.length() == 0 {
+            return NullableResult.Null<T>()
+        }
+        let foundValue: T = this[0]
+        let found = false
+
+        for let i: u64 = 0; i < this.len; i += 1 {
+            let value = this[i]
+            if f(value) {
+                foundValue = value
+                found = true
+            }
+        }
+
+        if found {
+            return NullableResult.Ok<T>(foundValue)
+        }
+
+        return NullableResult.Null<T>()
     }
 }
