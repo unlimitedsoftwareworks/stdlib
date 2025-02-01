@@ -235,7 +235,12 @@ type String = class {
     }
 
     fn clone() -> String {
-        let str = new String(this)
+        let newBuffer: u8[] = []
+        newBuffer.extend(this.rawLen)
+        for let i: u64 = 0; i < this.rawLen; i+= 1 {
+            newBuffer[i] = this.buffer[i]
+        }
+        let str = new String(newBuffer)
         return str
     }
 
@@ -275,7 +280,9 @@ type String = class {
      */
 
     fn + <T> (other: T) -> String {
-        return this.cat(other)
+        let str = this.clone()
+        str.cat(other)
+        return str
     }
 
     fn - (other: String) -> i64 {
