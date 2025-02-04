@@ -1,9 +1,9 @@
-from std.collections.array import Array
+from std.collections.array import Array, StdArray
 from std.unit.test import TestUnit, UnitSet
 
 fn test_init(rn: TestUnit) {
     let values = [1, 2, 3]
-    let arr = new Array<u8>(values)
+    let arr = new StdArray<u8>(values)
 
     rn.assert_eq(arr.length(), 3)
     rn.assert_eq(arr.len, 3)
@@ -16,7 +16,7 @@ fn test_init(rn: TestUnit) {
         rn.assert_eq(actual, expected)
     }
 
-    let arr2 = new Array<String[]>()
+    let arr2 = new StdArray<String[]>()
     rn.assert_eq(arr2.len, arr2.length())
     rn.assert_eq(arr2.len, 0)
     rn.assert_eq(arr2.data.length, 0)
@@ -24,7 +24,7 @@ fn test_init(rn: TestUnit) {
 
 fn test_push_pop(rn: TestUnit) {
     let values = [1, 2, 3]
-    let arr = new Array<u8>(values)
+    let arr = new StdArray<u8>(values)
     let gt_1 = [1, 2, 3, 1, 2, 3]
 
     arr.push(1)
@@ -47,7 +47,7 @@ fn test_push_pop(rn: TestUnit) {
     arr.push(3)
 
     arr.push([1, 2, 3])
-    arr.push(new Array<u8>([1, 2, 3]))
+    arr.push(new StdArray<u8>([1, 2, 3]))
 
     rn.assert_eq(arr.length(), 12)
 

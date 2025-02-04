@@ -1,16 +1,16 @@
-from std.collections.array import AbstractArray
+from std.collections.array import Array
 
-type AbstractIterable<T> = interface  {
+type Iterable<T> = interface  {
     fn next | () () -> (u64, T)
     fn hasNext() -> bool
 }
 
-type ArrayIterator<T> = class AbstractIterable<T> {
-    let const array: AbstractArray<T>
+type ArrayIterator<T> = class Iterable<T> {
+    let const array: Array<T>
     let index: u64
 
     // Constructor to initialize with an array
-    fn init(array: AbstractArray<T>) {
+    fn init(array: Array<T>) {
         this.array = array
         this.index = 0 // Start at the beginning
     }

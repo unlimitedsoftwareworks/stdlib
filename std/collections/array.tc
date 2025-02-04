@@ -15,10 +15,25 @@ type NullableResult<T> = variant {
  * Any Custom array class should implement this interface
  * @template T
  */
-type AbstractArray<T> = interface {
+type Array<T> = interface {
+    /**
+     * @brief Returns the element at the given index
+     */
     fn [] (i: u64) -> T
+
+    /**
+     * @brief Sets the element at the given index
+     */
     fn []= (i: u64, v: T) -> T
+
+    /**
+     * @brief Returns the element at the given index from the end of the array
+     */
     fn [-] (i: u64) -> T
+
+    /**
+     * @brief Sets the element at the given index from the end of the array
+     */
     fn [-]= (i: u64, v: T) -> T
 
     /**
@@ -27,14 +42,19 @@ type AbstractArray<T> = interface {
     fn length() -> u64
 
     /**
-     * @brief Returns the element at the given index
+     * @brief Pushes an element to the end of the array
      */
     fn push(v: T) -> void
 
     /**
-     * @brief Returns the element at the given index
+     * @brief Pops an element from the end of the array
      */
     fn pop() -> T
+
+    /**
+     * @brief Returns a shallow copy of the array
+     */
+    fn clone() -> Array<T>
 
     /**
      * @brief Returns an iterable instance to iterate over the array
@@ -52,12 +72,54 @@ type AbstractArray<T> = interface {
      * return true if the array is empty, false otherwise
      */
     fn isEmpty() -> bool
+
+    /**
+     * @brief checks if the array contains the element e
+     * return true if the element is found, false otherwise
+     */
+    fn contains(e: T) -> bool
+
+    /**
+     * @brief returns an array of elements that match the predicate f
+     * return an array of elements that match the predicate f
+     */
+    fn some(f: fn(x: T) -> bool) -> bool
+
+    /**
+     * @brief returns true if all elements match the predicate f
+     * return true if all elements match the predicate f, false otherwise
+     */
+    fn every(f: fn(x: T) -> bool) -> bool
+
+    /**
+     * @brief returns the first element that matches the predicate f
+     * return the first element that matches the predicate f, null if no element matches the predicate f
+     */
+    fn find(f: fn(x: T) -> bool) -> NullableResult<T>
+
+    /**
+     * @brief returns the index of the first element that matches the predicate f
+     * return the index of the first element that matches the predicate f, null if no element matches the predicate f
+     */
+    fn findIndex(f: fn(x: T) -> bool) -> NullableResult<u64>
+
+    /**
+     * @brief returns the last element that matches the predicate f
+     * return the last element that matches the predicate f, null if no element matches the predicate f
+     */
+    fn findLast(f: fn(x: T) -> bool) -> NullableResult<T>
+
+    /**
+     * @brief returns the index of the last element that matches the predicate f
+     * return the index of the last element that matches the predicate f, null if no element matches the predicate f
+     */
+    fn findLastIndex(f: fn(x: T) -> bool) -> NullableResult<u64>
 }
 
 /**
- * Standard Generic Array
+ * Standard Generic Array Implementation
  */
-type Array<T> = class AbstractArray<T> {
+type StdArray<T> = class Array<T> {
     let data: T[]
     let len: u64
     let capacity: u64
@@ -184,6 +246,10 @@ type Array<T> = class AbstractArray<T> {
         return this.capacity
     }
 
+    fn clone() -> Array<T> {
+        return new StdArray<T>(this.data)
+    }
+
     fn contains(e: T) {
         for let i: u64 = 0; i < this.len; i += 1 {
             if(this[i] == e) {
@@ -195,7 +261,7 @@ type Array<T> = class AbstractArray<T> {
     }
 
     fn map<Z>(f: fn (x: T) -> Z) -> Array<Z> {
-        let result1 = new Array<Z>([])
+        let result1 = new StdArray<Z>([])
         for let i: u64 = 0; i < this.len; i += 1 {
             result1.push(f(this.data[i]))
         }
@@ -204,7 +270,7 @@ type Array<T> = class AbstractArray<T> {
     }
 
     fn filter(f: fn (x: T) -> bool) -> Array<T> {
-        let result2 = new Array<T>([])
+        let result2 = new StdArray<T>([])
         
         for let i: u64 = 0; i < this.len; i = i + 1 {
             if f(this.data[i]) {
@@ -291,5 +357,27 @@ type Array<T> = class AbstractArray<T> {
         }
 
         return NullableResult.Null<T>()
+    }
+
+    fn findLastIndex(f: fn(x: T) -> bool) -> NullableResult<u64> {
+        if this.length() == 0 {
+            return NullableResult.Null<u64>()
+        }
+        let foundIndex: u64 = 0
+        let found = false
+
+        for let i: u64 = 0; i < this.len; i += 1 {
+            let value = this[i]
+            if f(value) {
+                foundIndex = i
+                found = true
+            }
+        }
+
+        if found {
+            return NullableResult.Ok<u64>(foundIndex)
+        }
+
+        return NullableResult.Null<u64>()
     }
 }
